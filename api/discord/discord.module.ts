@@ -1,31 +1,27 @@
-// discord/commands/hello.command.ts
-// Catch all the discords Events the adapted command
+// Purpose: initialize Discord client and route events
 
 import { Client, GatewayIntentBits, Events } from "discord.js";
-import { handleHelloCommand } from "./commands/hello.command";
+import { MessageEvent } from "./events/message.event";
 import { config } from "../config/config";
 
 export async function startDiscord() {
-  const client = new Client({
-    intents: [
-      GatewayIntentBits.Guilds,
-      GatewayIntentBits.GuildMessages,
-      GatewayIntentBits.MessageContent,
-    ],
-  });
-
-  client.once("ready", () => {  // if bot is connected to discord it return a log status
-    console.log(`Logged in as ${client.user?.tag}`);
+    const client = new Client({
+        intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        ],
     });
 
-  client.on(Events.MessageCreate, async (message) => {
-    // ignore bots (including itself)
-    if (message.author.bot) return;
+    client.once(Events.ClientReady, () => {
+        console.log(`Logged in as ${client.user?.tag}`);
+    });
 
-    if (message.content === "hello") {
-      await handleHelloCommand(message);
-    }
-  });
+    const messageEvent = new MessageEvent();
 
-  await client.login(config.DISCORD_TOKEN);
+    client.on(Events.MessageCreate, async (message) => {
+        await messageEvent.handle(message);
+    });
+
+    await client.login(config.DISCORD_TOKEN);
 }

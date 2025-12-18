@@ -1,3 +1,4 @@
+( DEV notes ) 
 How do the bot run:
 
 main.ts -> exit if init errors
@@ -12,16 +13,16 @@ discord/discord.module.ts
 Discord connects
   |
   v
-User triggers command
-  |
-  v
-command.ts
-  |
-  v
-repository.ts
-  |
-  v
-embed.ts
-  |
-  v
-Discord reply
+Read everymessages   ->  User triggers command
+                                    |
+                                    v
+                                  command.ts
+                                    |
+                                    v
+                                  repository.ts
+                                    |
+                                    v
+                                  embed.ts
+                                    |
+                                    v
+                                  Discord reply
