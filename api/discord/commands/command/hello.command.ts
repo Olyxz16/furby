@@ -4,8 +4,8 @@
 // run() -> hello.embed.ts.run(username)
 
 import { Message } from "discord.js";
-import { Command } from "./command.interface";
-import { helloEmbed } from "../embeds/hello.embed";
+import { Command } from "../command-Interface/default-command.interface";
+import { helloEmbed } from "../../embeds/hello.embed";
 
 export class HelloCommand implements Command {
   triggers = ["hello", "hi", "yo"];

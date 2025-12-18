@@ -1,4 +1,4 @@
-// Interface that 
+// Interface that associate a command with a list of words
 
 import { Message } from "discord.js";
 
