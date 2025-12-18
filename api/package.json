@@ -1,29 +1,17 @@
 {
   "name": "furby",
   "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "module",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "start": "ts-node src/main.ts",
-    "dev": "",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node api/main.ts"
   },
   "dependencies": {
     "discord.js": "^14.25.1",
-    "express": "^5.2.1",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.28.3",
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/preset-typescript": "^7.28.5",
-    "babel-plugin-module-resolver": "^5.0.2",
-    "babel-plugin-transform-import-paths": "^1.0.3",
-    "nodemon": "^3.1.11",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
   }
 }

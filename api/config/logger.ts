@@ -1,3 +1,4 @@
+// Purpose: centralized logging
 import winston from 'winston';
 
 const log = winston.createLogger({
