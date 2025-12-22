@@ -1,16 +1,14 @@
 export enum Day {
-  SUNDAY,
   MONDAY,
   TUESDAY,
   WEDNESDAY,
   THURSDAY,
   FRIDAY,
-  SATURDAY
 }
 
 export type Hour = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17;
 
-export class Week {
+export class Agenda {
   #schedule : Map<Day, Map<Hour, string>>;
 
   constructor() {
