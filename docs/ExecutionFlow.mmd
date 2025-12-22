@@ -1,0 +1,14 @@
+graph TD
+    A[Discord API: MessageCreate] --> B[Client Listener]
+    B --> C[MessageEvent.handle]
+    C --> D{Is Author Bot?}
+    D -- Yes --> E[Ignore Message]
+    D -- No --> F[Sanitize Content: lowercase & trim]
+    F --> G[Iterate Command Registry]
+    G --> H{Content matches trigger?}
+    H -- No --> I[Check next command]
+    H -- Yes --> J[Execute command.run]
+    J --> K[Command response sent to Discord]
+    I --> L{End of commands?}
+    L -- No --> G
+    L -- Yes --> M[End process]
