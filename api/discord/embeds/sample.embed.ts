@@ -1,0 +1,1 @@
+// Purpose: format bot responses
