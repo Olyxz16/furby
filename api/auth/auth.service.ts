@@ -48,7 +48,7 @@ export function Login(input: LoginDto): Session {
     throw new Error("Could not find user");
   }
   
-  const matches = bcrypt.compareSync(user.password, input.password);
+  const matches = bcrypt.compareSync(input.password, user.password);
   if(!matches) {
     throw new Error("Passwords don't match");
   }
@@ -82,15 +82,5 @@ export function ConsumeMagicLink(input: DiscordLinkInputDto): void {
 }
 
 function hash(input: string): string {
-  let result = "";
-  bcrypt.hash(input, SALT_ROUNDS, function(err, hash) {
-    if(!!err) {
-      throw err;
-    }
-    result = hash;
-  });
-  if(result == "") {
-    throw new Error("Error during password hashing");
-  }
-  return result;
+  return bcrypt.hashSync(input, SALT_ROUNDS);
 }

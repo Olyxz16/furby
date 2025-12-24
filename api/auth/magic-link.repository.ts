@@ -13,7 +13,7 @@ export function createMagicLink(input: CreateMagicLinkDto): MagicLink {
 
   const row = stmt.get({
     userId: input.userId,
-    token: input.link,
+    link: input.link,
     expiresAt: expiresAt.toISOString()
   }) as any;
 
