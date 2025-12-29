@@ -1,6 +1,5 @@
 import { Message } from "discord.js";
 import { Command } from "./command.interface";
-import { helloEmbed } from "../embeds/hello.embed";
 export class GifCommand implements Command {
   triggers = ["quoi ?"];
 
