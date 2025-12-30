@@ -1,0 +1,54 @@
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cardTitle { font-size: 18px; margin: 0; }
+.cardBody { padding: 16px; }
+
+.select {
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  background: white;
+  font-size: 14px;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.table th, .table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 14px;
+}
+
+.table thead th {
+  background: rgba(0, 0, 0, 0.03);
+  font-weight: 800;
+}
+
+.table tbody tr:hover { background: rgba(0, 0, 0, 0.02); }

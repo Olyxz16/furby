@@ -1,0 +1,54 @@
+.app { height: 100vh; display: flex; flex-direction: column; }
+
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #fff;
+  background: #0f1f24;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand { font-weight: 800; letter-spacing: 0.5px; }
+
+.topbarRight { display: flex; gap: 10px; align-items: center; }
+
+.badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.body { flex: 1; display: flex; min-height: 0; }
+
+.sidenav {
+  width: 260px;
+  background: #132a30;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d7dde0;
+  padding: 16px;
+}
+
+.nav { display: flex; flex-direction: column; gap: 8px; }
+
+.navItem {
+  padding: 10px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.navItem:hover { background: rgba(255, 255, 255, 0.06); }
+
+.navItemActive {
+  background: rgba(255, 255, 255, 0.10);
+  color: #fff;
+  opacity: 1;
+}
+
+.content { flex: 1; min-width: 0; padding: 20px; background: #f4f6f7; }
