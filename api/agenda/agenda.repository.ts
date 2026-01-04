@@ -2,6 +2,8 @@ import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadshee
 import { JWT } from 'google-auth-library';
 import { config } from '../config/config';
 import { Agenda, Day, Hour } from './agenda.entity';
+import { GetAgendaIdByUserIdDto, LinkAgendaToUserDto } from './dto/agenda.dto';
+import db from "../config/db";
 
 const jwt = new JWT({
   email: config.GOOGLE_AUTH_EMAIL,
@@ -27,12 +29,7 @@ export async function getUsers() : Promise<string[]> {
   return result;
 }
 
-export async function getUserAgenda(name: string) : Promise<Agenda> {
-  const id = await getIdFromName(name);
-  if(!id) {
-    throw "No id matching name " + name;
-  }
-
+export async function getAgendaFromId(id: string): Promise<Agenda> {
   const sheet = await getSheetById(id);
   if(!sheet) {
     throw "No sheet matching name " + name;
@@ -59,15 +56,18 @@ export async function getUserAgenda(name: string) : Promise<Agenda> {
   return agenda;
 }
 
-export async function setUserAgenda(name: string, agenda: Agenda): Promise<void> {
+export async function getUserAgenda(name: string) : Promise<Agenda> {
   const id = await getIdFromName(name);
   if(!id) {
     throw "No id matching name " + name;
   }
+  return getAgendaFromId(id);
+}
 
+export async function setAgendaFromId(id: string, agenda: Agenda): Promise<void> {
   const sheet = await getSheetById(id);
   if(!sheet) {
-    throw "No sheet matching name " + name;
+    throw "No sheet matching id " + id;
   }
 
   for(let i = 0; i < 5 ; i++) {
@@ -90,6 +90,14 @@ export async function setUserAgenda(name: string, agenda: Agenda): Promise<void>
   await sheet.saveUpdatedCells();
 }
 
+export async function setUserAgenda(name: string, agenda: Agenda): Promise<void> {
+  const id = await getIdFromName(name);
+  if(!id) {
+    throw "No id matching name " + name;
+  }
+  return setAgendaFromId(id, agenda);
+}
+
 async function getIdFromName(name: string): Promise<string | undefined> {
   const slug = name.toLowerCase();
 
@@ -107,6 +115,23 @@ async function getIdFromName(name: string): Promise<string | undefined> {
   return undefined;
 }
 
+async function getNameFromId(id: string): Promise<string | undefined> {
+  const slug = id.toLowerCase();
+
+  await doc.loadInfo();
+  const nameSheet = doc.sheetsById[1871304734];
+  await nameSheet.loadCells(); 
+
+  for(let i = 0 ; i < nameSheet.rowCount ; i++) {
+      const name = nameSheet.getCell(i, 1).value;
+      if(name?.toString().toLowerCase() == slug) {
+        return nameSheet.getCell(i, 0).value?.toString();
+      }
+  }
+
+  return undefined;
+}
+
 async function getSheetById(id: string): Promise<GoogleSpreadsheetWorksheet | undefined> {
   for(let i = 0 ; i < doc.sheetCount ; i++) {
     const sheet = doc.sheetsByIndex[i];
@@ -115,4 +140,29 @@ async function getSheetById(id: string): Promise<GoogleSpreadsheetWorksheet | un
     }
   }
   return undefined;
+}
+
+export function linkAgendaToUser(input: LinkAgendaToUserDto): void {
+  const stmt = db.prepare(`
+    INSERT INTO Agendas (user_id, agenda_id)
+    VALUES (@userId, @agendaId)
+    ON CONFLICT(user_id) DO UPDATE SET
+      agenda_id = excluded.agenda_id
+  `);
+  
+  stmt.run(input);
+}
+
+export function getAgendaIdByUserId(input: GetAgendaIdByUserIdDto): string {
+  const stmt = db.prepare(`
+    SELECT agenda_id FROM Agendas
+    WHERE user_id = @userId
+  `);
+
+  const row = stmt.get(input) as any;
+  if (!row) {
+    throw new Error("User not found");
+  }
+
+  return row.agenda_id;
 }

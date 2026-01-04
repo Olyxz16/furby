@@ -36,3 +36,11 @@ CREATE TABLE MagicLinks (
 );
 
 CREATE INDEX idx_magic_links_code ON MagicLinks(link);
+
+-- 4. Agenda
+CREATE TABLE Agendas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    agenda_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);
