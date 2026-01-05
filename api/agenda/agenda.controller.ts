@@ -3,9 +3,9 @@ import { AuthenticatedRequest } from "../http/middlewares/session.middleware";
 import { getAgendaFromUser, updateAgendaFromUser } from "./agenda.service";
 import { AgendaTransformationError } from "./dto/agenda.dto";
 
-export const router = express.Router();
+export const agendaRouter = express.Router();
 
-router.get("/me", (req: AuthenticatedRequest, res: Response) => {
+agendaRouter.get("/me", (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
   if(!user) {
     return res.status(401).json({"error": "Unauthorized"});
@@ -19,7 +19,7 @@ router.get("/me", (req: AuthenticatedRequest, res: Response) => {
     });
 });
 
-router.post("/", (req: AuthenticatedRequest, res: Response) => {
+agendaRouter.post("/", (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
   if(!user) {
     return res.status(401).json({"error": "Unauthorized"});

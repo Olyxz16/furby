@@ -1,4 +1,5 @@
 import { UserRole } from "../../auth/role.entity";
+import { User } from "../user.entity";
 
 export interface UserCreateDto {
   mail: string;
@@ -30,3 +31,10 @@ export interface UserResponseDto {
   isDiscordLinked: boolean;
 }
 
+export function toUserDto(user: User): UserResponseDto {
+  return {
+    id: user.id,
+    mail: user.mail,
+    isDiscordLinked: user.discordUserId !== null
+  }
+}

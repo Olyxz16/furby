@@ -3,6 +3,7 @@ import { User } from "@/user/user.entity";
 import { NextFunction, Request, Response } from "express";
 
 export interface AuthenticatedRequest extends Request {
+  sessionToken?: string,
   user?: User,
 }
 
@@ -13,6 +14,7 @@ export const checkAuthenticatedUser = (req: AuthenticatedRequest, res: Response,
   if(!user) {
     return res.status(401).json({"error": "Unauthorized"});
   }
+  req.sessionToken = token;
   req.user = user;
   next();
 };
