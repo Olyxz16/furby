@@ -4,10 +4,10 @@
 // run() -> hello.embed.ts.run(username)
 
 import { Message } from "discord.js";
-import { Command } from "./command.interface";
+import { MessageCommand } from "../types/index";
 import { helloEmbed } from "../embeds/hello.embed";
 
-export class HelloCommand implements Command {
+export class HelloCommand implements MessageCommand {
   triggers = ["hello", "hi", "yo"];
 
   async run(message: Message): Promise<void> {

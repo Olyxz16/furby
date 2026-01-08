@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
-import { Command } from "./command.interface";
+import { MessageCommand } from "../types/index";
 import { helloEmbed } from "../embeds/hello.embed";
-export class GifCommand implements Command {
+export class GifCommand implements MessageCommand {
   triggers = ["quoi ?"];
 
  
