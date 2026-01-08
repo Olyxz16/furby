@@ -1,29 +1,17 @@
 {
-  "name": "furby",
+  "name": "@furby/api",
   "version": "1.0.0",
-  "private": true,
+  "description": "",
+  "main": "index.ts",
   "scripts": {
-    "start": "ts-node ./main.ts"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
   "dependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.5.0",
-    "cookie-parser": "^1.4.7",
-    "discord.js": "^14.25.1",
-    "dotenv": "^16.4.5",
-    "google-auth-library": "^10.5.0",
-    "google-spreadsheet": "^5.0.2",
-    "winston": "^3.19.0"
-  },
-  "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/express": "^5.0.6",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.0"
+    "expres": "^0.0.5",
+    "@furby/common": "*"
   }
 }
