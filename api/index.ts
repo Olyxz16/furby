@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { app } from './server';
-import { config } from '../common/config/config';
+import { config } from '@/config/config';
 
 async function main() {
   app.listen(config.PORT);

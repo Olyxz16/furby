@@ -1,11 +1,7 @@
-import { getUserFromSessionToken } from "@/auth/auth.service";
-import { User } from "@/user/user.entity";
-import { NextFunction, Request, Response } from "express";
-
-export interface AuthenticatedRequest extends Request {
-  sessionToken?: string,
-  user?: User,
-}
+import { getUserFromSessionToken } from "../../common/auth/auth.service";
+import { User } from "../../common/user/user.entity";
+import { NextFunction, Response } from "express";
+import { AuthenticatedRequest } from "../../common/auth/types";
 
 export const checkAuthenticatedUser = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const cookies = req.cookies;

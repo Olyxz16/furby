@@ -1,8 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { agendaRouter } from 'agenda/agenda.controller';
-import { authRouter } from 'auth/auth.controller';
-import { config } from 'config/config';
+import { agendaRouter } from '@/agenda/agenda.controller';
+import { authRouter } from '@/auth/auth.controller';
 export const app = express();
 
 app.use(express.json());
