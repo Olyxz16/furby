@@ -1,6 +1,5 @@
 import { Message } from "discord.js";
 import { MessageCommand } from "../types/index";
-import { helloEmbed } from "../embeds/hello.embed";
 export class GifCommand implements MessageCommand {
   triggers = ["quoi ?"];
 
@@ -17,7 +16,7 @@ export class GifCommand implements MessageCommand {
     const randomGif = this.gifs[Math.floor(Math.random() * this.gifs.length)];
 
     await message.reply({
-      files: [randomGif]
+      content: randomGif
     });
   }
 }
