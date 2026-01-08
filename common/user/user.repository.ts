@@ -1,17 +1,17 @@
 import { GetUserByIdDto, GetUserByMailDto, RemoveDiscordIdDto, SetDiscordIdDto, UserCreateDto } from './dto/user.dto';
 import { User } from './user.entity';
 import db from '../config/db';
-import { SqliteError } from 'better-sqlite3';
 
-export function create(user: UserCreateDto): User {
-  const stmt = db.prepare(`
+export async function create(user: UserCreateDto): Promise<User> {
+  const query = `
     INSERT INTO Users (mail, password, role, discord_user_id) 
-    VALUES(@mail, @password, @role, @discordUserId)
+    VALUES($1, $2, $3, $4)
     RETURNING id, mail, password, role, discord_user_id, created_at, updated_at;
-`);
+  `;
 
   try {
-    const row = stmt.get(user) as any;
+    const res = await db.query(query, [user.mail, user.password, user.role, user.discordUserId]);
+    const row = res.rows[0];
 
     return {
       id: row.id,
@@ -19,31 +19,33 @@ export function create(user: UserCreateDto): User {
       password: row.password,
       role: row.role,
       discordUserId: row.discord_user_id,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
-  } catch(err) {
-    if(err instanceof SqliteError && err.code == 'SQLITE_CONSTRAINT_UNIQUE') {
+  } catch(err: any) {
+    if(err.code === '23505') { // unique_violation
       throw new Error('User with this email already exists.');
     }
     throw err;
   }
 }
 
-export function save(user: User): User {
-  const stmt = db.prepare(`
-    INSERT INTO Users (id, email, password, role, discord_user_id)
-    VALUES (@id, @mail, @password, @role, @discordUserId)
+export async function save(user: User): Promise<User> {
+  const query = `
+    INSERT INTO Users (id, mail, password, role, discord_user_id)
+    VALUES ($1, $2, $3, $4, $5)
     ON CONFLICT(id) DO UPDATE SET
       mail = excluded.mail,
       password = excluded.password,
       role = excluded.role,
       discord_user_id = excluded.discord_user_id,
-      update_id = CURRENT_TIMESTAMP
-  `);
+      updated_at = CURRENT_TIMESTAMP
+    RETURNING id, mail, password, role, discord_user_id, created_at, updated_at;
+  `;
 
   try {
-    const row = stmt.get(user) as any;
+    const res = await db.query(query, [user.id, user.mail, user.password, user.role, user.discordUserId]);
+    const row = res.rows[0];
     
     return {
       id: row.id,
@@ -51,25 +53,26 @@ export function save(user: User): User {
       password: row.password,
       role: row.role,
       discordUserId: row.discord_user_id,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     }
-  } catch(err) {
-    if(err instanceof SqliteError && err.code == 'SQLITE_CONSTRAINT_UNIQUE') {
-      throw new Error('User with th is email already exists');
+  } catch(err: any) {
+    if(err.code === '23505') {
+      throw new Error('User with this email already exists');
     }
     throw err;
   }
 }
 
-export function getById(input: GetUserByIdDto): User|undefined {
-  const stmt = db.prepare(`
+export async function getById(input: GetUserByIdDto): Promise<User|undefined> {
+  const query = `
     SELECT id, mail, password, role, discord_user_id, created_at, updated_at
     FROM Users
-    WHERE id = @id;
-`);
+    WHERE id = $1;
+  `;
 
-  const row = stmt.get(input.id) as any;
+  const res = await db.query(query, [input.id]);
+  const row = res.rows[0];
   if(!row) {
     return undefined;
   }
@@ -85,14 +88,15 @@ export function getById(input: GetUserByIdDto): User|undefined {
   }
 }
 
-export function getByMail(input: GetUserByMailDto): User|undefined {
-  const stmt = db.prepare(`
+export async function getByMail(input: GetUserByMailDto): Promise<User|undefined> {
+  const query = `
     SELECT id, mail, password, role, discord_user_id, created_at, updated_at
     FROM Users
-    WHERE id = @id;
-`);
+    WHERE mail = $1;
+  `;
 
-  const row = stmt.get(input.mail) as any;
+  const res = await db.query(query, [input.mail]);
+  const row = res.rows[0];
   if(!row) {
     return undefined;
   }
@@ -108,16 +112,17 @@ export function getByMail(input: GetUserByMailDto): User|undefined {
   }
 }
 
-export function setDiscordId(input: SetDiscordIdDto): User {
-  const stmt = db.prepare(`
+export async function setDiscordId(input: SetDiscordIdDto): Promise<User> {
+  const query = `
     UPDATE Users 
-    SET discord_user_id = ?
-    WHERE id = ?
+    SET discord_user_id = $1
+    WHERE id = $2
     RETURNING id, mail, password, role, discord_user_id, created_at, updated_at;
-  `);
+  `;
 
   try {
-    const row = stmt.get(input.discordUserId, input.userId) as any;
+    const res = await db.query(query, [input.discordUserId, input.userId]);
+    const row = res.rows[0];
     if(!row) {
       throw new Error('User not found')
     }
@@ -128,27 +133,28 @@ export function setDiscordId(input: SetDiscordIdDto): User {
       password: row.password,
       role: row.role,
       discordUserId: row.discord_user_id,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     };
-  } catch(err) {
-    if(err instanceof SqliteError && err.code == 'SQLITE_CONSTRAINT_UNIQUE') {
+  } catch(err: any) {
+    if(err.code === '23505') {
       throw new Error('This discord account is already linked to another user.');
     }
     throw err;
   }
 }
 
-export function removeDiscordId(input: RemoveDiscordIdDto): User {
-  const stmt = db.prepare(`
+export async function removeDiscordId(input: RemoveDiscordIdDto): Promise<User> {
+  const query = `
     UPDATE Users 
     SET discord_user_id = NULL
-    WHERE id = ?
+    WHERE id = $1
     RETURNING id, mail, password, role, discord_user_id, created_at, updated_at;
-  `);
+  `;
 
   try {
-    const row = stmt.get(input.userId) as any;
+    const res = await db.query(query, [input.userId]);
+    const row = res.rows[0];
 
     if(!row) {
       throw new Error('User not found');
@@ -160,12 +166,13 @@ export function removeDiscordId(input: RemoveDiscordIdDto): User {
       password: row.password,
       role: row.role,
       discordUserId: row.discord_user_id,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     }
-  } catch(err) {
-    if(err instanceof SqliteError && err.code == 'SQLITE_CONSTRAINT_UNIQUE') {
-      throw new Error('User with th is email already exists');
+  } catch(err: any) {
+    // Should not happen for setting NULL, but kept for consistency
+    if(err.code === '23505') {
+      throw new Error('User with this email already exists');
     }
     throw err;
   }

@@ -142,24 +142,25 @@ async function getSheetById(id: string): Promise<GoogleSpreadsheetWorksheet | un
   return undefined;
 }
 
-export function linkAgendaToUser(input: LinkAgendaToUserDto): void {
-  const stmt = db.prepare(`
+export async function linkAgendaToUser(input: LinkAgendaToUserDto): Promise<void> {
+  const query = `
     INSERT INTO Agendas (user_id, agenda_id)
-    VALUES (@userId, @agendaId)
+    VALUES ($1, $2)
     ON CONFLICT(user_id) DO UPDATE SET
       agenda_id = excluded.agenda_id
-  `);
+  `;
   
-  stmt.run(input);
+  await db.query(query, [input.userId, input.agendaId]);
 }
 
-export function getAgendaIdByUserId(input: GetAgendaIdByUserIdDto): string {
-  const stmt = db.prepare(`
+export async function getAgendaIdByUserId(input: GetAgendaIdByUserIdDto): Promise<string> {
+  const query = `
     SELECT agenda_id FROM Agendas
-    WHERE user_id = @userId
-  `);
+    WHERE user_id = $1
+  `;
 
-  const row = stmt.get(input) as any;
+  const res = await db.query(query, [input.userId]);
+  const row = res.rows[0];
   if (!row) {
     throw new Error("User not found");
   }

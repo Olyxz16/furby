@@ -6,6 +6,10 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "scripts": {
+    "start:api": "DOTENV_CONFIG_PATH=../.env npm run start -w api",
+    "start:bot": "DOTENV_CONFIG_PATH=../.env npm run start -w discord"
+  },
   "workspaces": [
     "api",
     "discord",

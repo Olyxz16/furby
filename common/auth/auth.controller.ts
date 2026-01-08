@@ -5,41 +5,45 @@ import { AuthenticatedRequest } from "./types";
 
 export const authRouter = express.Router();
 
-authRouter.post("/signin", (req, res) => {
+authRouter.post("/signin", async (req, res) => {
   const { mail, password } = req.body;
   try {
-    const { user, session } = SignIn({mail, password})
+    const { user, session } = await SignIn({mail, password})
     res.cookie("session", session.token);
     const dto = toUserDto(user);
     res.status(201).json(dto);
     return;
   } catch(err) {
+    console.error(err);
     return res.status(500).json({"error": "Internal server error"});
   }
 });
 
-authRouter.post("/login", (req, res) => {
+authRouter.post("/login", async (req, res) => {
   const { mail, password } = req.body;
   try {
-    const session = Login({mail, password})
+    const session = await Login({mail, password})
     res.cookie("session", session.token);
     res.status(200).json({"status": "ok"});
     return;
   } catch(err) {
+    console.error(err);
     return res.status(500).json({"error": "Internal server error"});
   }
 });
 
-authRouter.post("/logout", (req: AuthenticatedRequest, res: Response) => {
+authRouter.post("/logout", async (req: AuthenticatedRequest, res: Response) => {
   const token = req.sessionToken;
   if(!token) {
     return res.status(401).json({"error": "Unauthorized"});
   }
 
   try {
-    Logout({ token: token });
+    await Logout({ token: token });
     res.clearCookie("session");
+    res.status(200).json({"status": "ok"});
   } catch(err) {
+    console.error(err);
     return res.status(500).json({"error": "Internal server error"});
   }
 });

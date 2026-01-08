@@ -1,15 +1,30 @@
+import { Pool } from 'pg';
+import { config } from './config';
 import fs from 'node:fs';
-import Database from 'better-sqlite3';
+
+const pool = new Pool({
+  user: config.DB_USER,
+  host: config.DB_HOST,
+  database: config.DB_NAME,
+  password: config.DB_PASSWORD,
+  port: parseInt(config.DB_PORT || '5432'),
+});
 
 const MIGRATE = process.env.MIGRATE;
 const MIGRATION_FILE = "./schema/schema.sql";
 
-const db = new Database('data.db', {verbose: console.log});
-db.pragma('foreign_keys = ON');
-
 if(MIGRATE == "true") {
-  const migration = fs.readFileSync(MIGRATION_FILE).toString();
-  db.exec(migration);
+  (async () => {
+    try {
+        const client = await pool.connect();
+        const migration = fs.readFileSync(MIGRATION_FILE).toString();
+        await client.query(migration);
+        client.release();
+        console.log("Migration executed successfully");
+    } catch(err) {
+        console.error("Migration failed", err);
+    }
+  })();
 }
 
-export default db;
+export default pool;

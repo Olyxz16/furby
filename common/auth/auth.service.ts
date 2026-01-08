@@ -11,22 +11,22 @@ import { createMagicLink, getMagicLinkByLink } from "./magic-link.repository";
 
 const SALT_ROUNDS = 10;
 
-export function getUserFromSessionToken(token: string): User {
-  const session = getSessionByToken({token: token});
+export async function getUserFromSessionToken(token: string): Promise<User> {
+  const session = await getSessionByToken({token: token});
   if(!session) {
     throw new Error("Could not find session");
   }
-  const user = getById({id: session.userId});
+  const user = await getById({id: session.userId});
   if(!user) {
-    deleteSessionByToken({token: token});
+    await deleteSessionByToken({token: token});
     throw new Error("Could not find user");
   }
   return user;
 }
 
-export function SignIn(input: SignInDto): SignInResponseDto {
+export async function SignIn(input: SignInDto): Promise<SignInResponseDto> {
   const hashedPassword = hash(input.password);
-  const user = create({
+  const user = await create({
     mail: input.mail,
     password: hashedPassword,
     role: UserRole.USER,
@@ -34,7 +34,7 @@ export function SignIn(input: SignInDto): SignInResponseDto {
   });
 
   const token = crypto.randomUUID();
-  const session = createSession({userId: user.id, token});
+  const session = await createSession({userId: user.id, token});
   
   return {
     user: user,
@@ -42,8 +42,8 @@ export function SignIn(input: SignInDto): SignInResponseDto {
   };
 }
 
-export function Login(input: LoginDto): Session {
-  const user = getByMail({mail: input.mail});
+export async function Login(input: LoginDto): Promise<Session> {
+  const user = await getByMail({mail: input.mail});
   if(!user) {
     throw new Error("Could not find user");
   }
@@ -54,31 +54,31 @@ export function Login(input: LoginDto): Session {
   }
   
   const token = crypto.randomUUID();
-  const session = createSession({userId: user.id, token: token});
+  const session = await createSession({userId: user.id, token: token});
   return session;
 }
 
-export function Logout(input: LogoutDto): void {
-  deleteSessionByToken({token: input.token});
+export async function Logout(input: LogoutDto): Promise<void> {
+  await deleteSessionByToken({token: input.token});
 }
 
-export function CreateMagicLink(input: CreateMagicLinkDto): MagicLink {
+export async function CreateMagicLink(input: CreateMagicLinkDto): Promise<MagicLink> {
   const link = crypto.randomUUID();
-  const magicLink = createMagicLink({userId: input.userId, link: link});
+  const magicLink = await createMagicLink({userId: input.userId, link: link});
   return magicLink;
 }
 
-export function ConsumeMagicLink(input: DiscordLinkInputDto): void {
-  const magicLink = getMagicLinkByLink({link: input.magicLinkCode});
+export async function ConsumeMagicLink(input: DiscordLinkInputDto): Promise<void> {
+  const magicLink = await getMagicLinkByLink({link: input.magicLinkCode});
   if(!magicLink) {
     throw new Error("Could not find magic link");
   }
-  const user = getById({id: magicLink.userId});
+  const user = await getById({id: magicLink.userId});
   if(!user) {
     throw new Error("Could not find user");
   }
   user.discordUserId = input.discordUserId;
-  save(user);
+  await save(user);
 }
 
 function hash(input: string): string {

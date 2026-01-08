@@ -57,40 +57,40 @@ describe('AuthService', () => {
   });
 
   describe('getUserFromSessionToken', () => {
-    it('should return user when session and user exist', () => {
-      (sessionRepo.getSessionByToken as jest.Mock).mockReturnValue(mockSession);
-      (userRepo.getById as jest.Mock).mockReturnValue(mockUser);
+    it('should return user when session and user exist', async () => {
+      (sessionRepo.getSessionByToken as jest.Mock).mockResolvedValue(mockSession);
+      (userRepo.getById as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = getUserFromSessionToken('mocked-token');
+      const result = await getUserFromSessionToken('mocked-token');
 
       expect(sessionRepo.getSessionByToken).toHaveBeenCalledWith({ token: 'mocked-token' });
       expect(userRepo.getById).toHaveBeenCalledWith({ id: mockSession.userId });
       expect(result).toEqual(mockUser);
     });
 
-    it('should throw error when session does not exist', () => {
-      (sessionRepo.getSessionByToken as jest.Mock).mockReturnValue(undefined);
+    it('should throw error when session does not exist', async () => {
+      (sessionRepo.getSessionByToken as jest.Mock).mockResolvedValue(undefined);
 
-      expect(() => getUserFromSessionToken('invalid-token')).toThrow('Could not find session');
+      await expect(getUserFromSessionToken('invalid-token')).rejects.toThrow('Could not find session');
     });
 
-    it('should throw error and delete session when user does not exist', () => {
-      (sessionRepo.getSessionByToken as jest.Mock).mockReturnValue(mockSession);
-      (userRepo.getById as jest.Mock).mockReturnValue(undefined);
+    it('should throw error and delete session when user does not exist', async () => {
+      (sessionRepo.getSessionByToken as jest.Mock).mockResolvedValue(mockSession);
+      (userRepo.getById as jest.Mock).mockResolvedValue(undefined);
 
-      expect(() => getUserFromSessionToken('mocked-token')).toThrow('Could not find user');
+      await expect(getUserFromSessionToken('mocked-token')).rejects.toThrow('Could not find user');
       expect(sessionRepo.deleteSessionByToken).toHaveBeenCalledWith({ token: 'mocked-token' });
     });
   });
 
   describe('SignIn', () => {
-    it('should create user and session', () => {
+    it('should create user and session', async () => {
       const signInInput = { mail: 'test@example.com', password: 'password' };
       (bcrypt.hashSync as jest.Mock).mockReturnValue('hashed-password');
-      (userRepo.create as jest.Mock).mockReturnValue(mockUser);
-      (sessionRepo.createSession as jest.Mock).mockReturnValue(mockSession);
+      (userRepo.create as jest.Mock).mockResolvedValue(mockUser);
+      (sessionRepo.createSession as jest.Mock).mockResolvedValue(mockSession);
 
-      const result = SignIn(signInInput);
+      const result = await SignIn(signInInput);
 
       expect(bcrypt.hashSync).toHaveBeenCalledWith('password', 10);
       expect(userRepo.create).toHaveBeenCalledWith({
@@ -108,13 +108,13 @@ describe('AuthService', () => {
   });
 
   describe('Login', () => {
-    it('should return session when credentials are valid', () => {
+    it('should return session when credentials are valid', async () => {
       const loginInput = { mail: 'test@example.com', password: 'password' };
-      (userRepo.getByMail as jest.Mock).mockReturnValue(mockUser);
+      (userRepo.getByMail as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compareSync as jest.Mock).mockReturnValue(true);
-      (sessionRepo.createSession as jest.Mock).mockReturnValue(mockSession);
+      (sessionRepo.createSession as jest.Mock).mockResolvedValue(mockSession);
 
-      const result = Login(loginInput);
+      const result = await Login(loginInput);
 
       expect(userRepo.getByMail).toHaveBeenCalledWith({ mail: loginInput.mail });
       expect(bcrypt.compareSync).toHaveBeenCalledWith(loginInput.password, mockUser.password);
@@ -125,34 +125,34 @@ describe('AuthService', () => {
       expect(result).toEqual(mockSession);
     });
 
-    it('should throw error when user not found', () => {
-      (userRepo.getByMail as jest.Mock).mockReturnValue(undefined);
+    it('should throw error when user not found', async () => {
+      (userRepo.getByMail as jest.Mock).mockResolvedValue(undefined);
 
-      expect(() => Login({ mail: 'wrong@example.com', password: 'password' }))
-        .toThrow('Could not find user');
+      await expect(Login({ mail: 'wrong@example.com', password: 'password' }))
+        .rejects.toThrow('Could not find user');
     });
 
-    it('should throw error when password does not match', () => {
-      (userRepo.getByMail as jest.Mock).mockReturnValue(mockUser);
+    it('should throw error when password does not match', async () => {
+      (userRepo.getByMail as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compareSync as jest.Mock).mockReturnValue(false);
 
-      expect(() => Login({ mail: 'test@example.com', password: 'wrong' }))
-        .toThrow("Passwords don't match");
+      await expect(Login({ mail: 'test@example.com', password: 'wrong' }))
+        .rejects.toThrow("Passwords don't match");
     });
   });
 
   describe('Logout', () => {
-    it('should delete session', () => {
-      Logout({ token: 'mocked-token' });
+    it('should delete session', async () => {
+      await Logout({ token: 'mocked-token' });
       expect(sessionRepo.deleteSessionByToken).toHaveBeenCalledWith({ token: 'mocked-token' });
     });
   });
 
   describe('CreateMagicLink', () => {
-    it('should create magic link', () => {
-      (magicLinkRepo.createMagicLink as jest.Mock).mockReturnValue(mockMagicLink);
+    it('should create magic link', async () => {
+      (magicLinkRepo.createMagicLink as jest.Mock).mockResolvedValue(mockMagicLink);
 
-      const result = CreateMagicLink({ userId: 1, link: '' }); // link input is ignored in service logic as it generates UUID
+      const result = await CreateMagicLink({ userId: 1, link: '' }); 
 
       expect(magicLinkRepo.createMagicLink).toHaveBeenCalledWith({
         userId: 1,
@@ -163,34 +163,33 @@ describe('AuthService', () => {
   });
 
   describe('ConsumeMagicLink', () => {
-    it('should update user discordUserId when valid', () => {
+    it('should update user discordUserId when valid', async () => {
       const input = { magicLinkCode: 'mocked-uuid', discordUserId: 'discord-123' };
-      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockReturnValue(mockMagicLink);
-      (userRepo.getById as jest.Mock).mockReturnValue(mockUser);
+      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockResolvedValue(mockMagicLink);
+      (userRepo.getById as jest.Mock).mockResolvedValue(mockUser);
 
-      ConsumeMagicLink(input);
+      await ConsumeMagicLink(input);
 
       expect(magicLinkRepo.getMagicLinkByLink).toHaveBeenCalledWith({ link: input.magicLinkCode });
       expect(userRepo.getById).toHaveBeenCalledWith({ id: mockMagicLink.userId });
       
-      // Check if user object was modified and saved
       expect(mockUser.discordUserId).toBe('discord-123');
       expect(userRepo.save).toHaveBeenCalledWith(mockUser);
     });
 
-    it('should throw error when magic link not found', () => {
-      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockReturnValue(undefined);
+    it('should throw error when magic link not found', async () => {
+      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockResolvedValue(undefined);
 
-      expect(() => ConsumeMagicLink({ magicLinkCode: 'invalid', discordUserId: '123' }))
-        .toThrow('Could not find magic link');
+      await expect(ConsumeMagicLink({ magicLinkCode: 'invalid', discordUserId: '123' }))
+        .rejects.toThrow('Could not find magic link');
     });
 
-    it('should throw error when user associated with link not found', () => {
-      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockReturnValue(mockMagicLink);
-      (userRepo.getById as jest.Mock).mockReturnValue(undefined);
+    it('should throw error when user associated with link not found', async () => {
+      (magicLinkRepo.getMagicLinkByLink as jest.Mock).mockResolvedValue(mockMagicLink);
+      (userRepo.getById as jest.Mock).mockResolvedValue(undefined);
 
-      expect(() => ConsumeMagicLink({ magicLinkCode: 'mocked-uuid', discordUserId: '123' }))
-        .toThrow('Could not find user');
+      await expect(ConsumeMagicLink({ magicLinkCode: 'mocked-uuid', discordUserId: '123' }))
+        .rejects.toThrow('Could not find user');
     });
   });
 });

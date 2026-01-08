@@ -2,20 +2,17 @@ import db from '../config/db';
 import { CreateMagicLinkDto, DeleteMagicLinkByLinkDto, GetMagicLinkByLinkDto } from './dto/magic-link.dto';
 import { MagicLink, setExpiry } from './magic-link.entity';
 
-export function createMagicLink(input: CreateMagicLinkDto): MagicLink {
+export async function createMagicLink(input: CreateMagicLinkDto): Promise<MagicLink> {
   const expiresAt = setExpiry();
 
-   const stmt = db.prepare(`
+   const query = `
     INSERT INTO MagicLinks (user_id, link, expires_at)
-    VALUES (@userId, @link, @expiresAt)
+    VALUES ($1, $2, $3)
     RETURNING id, user_id, link, created_at, expires_at;
-  `);
+  `;
 
-  const row = stmt.get({
-    userId: input.userId,
-    link: input.link,
-    expiresAt: expiresAt.toISOString()
-  }) as any;
+  const res = await db.query(query, [input.userId, input.link, expiresAt.toISOString()]);
+  const row = res.rows[0];
 
   return {
     id: row.id,
@@ -26,19 +23,20 @@ export function createMagicLink(input: CreateMagicLinkDto): MagicLink {
   };
 }
 
-export function getMagicLinkByLink(input: GetMagicLinkByLinkDto): MagicLink|undefined {
-  const stmt = db.prepare(`
-    SELECT * FROM MagicLinks WHERE link = ?
-  `);
+export async function getMagicLinkByLink(input: GetMagicLinkByLinkDto): Promise<MagicLink|undefined> {
+  const query = `
+    SELECT * FROM MagicLinks WHERE link = $1
+  `;
 
-  const row = stmt.get(input.link) as any;
+  const res = await db.query(query, [input.link]);
+  const row = res.rows[0];
   if (!row) {
     return undefined;
   }
 
   const expiresAt = new Date(row.expires_at);
   if (expiresAt < new Date()) {
-    deleteMagicLinkByLink(input);
+    await deleteMagicLinkByLink(input);
     return undefined;
   }
 
@@ -51,9 +49,9 @@ export function getMagicLinkByLink(input: GetMagicLinkByLinkDto): MagicLink|unde
   };
 }
 
-export function deleteMagicLinkByLink(input: DeleteMagicLinkByLinkDto): void {
-    const stmt = db.prepare(`
-      DELETE FROM MagicLinks WHERE link = ?
-    `)
-    stmt.run(input.link);
+export async function deleteMagicLinkByLink(input: DeleteMagicLinkByLinkDto): Promise<void> {
+    const query = `
+      DELETE FROM MagicLinks WHERE link = $1
+    `
+    await db.query(query, [input.link]);
 }
