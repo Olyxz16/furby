@@ -14,6 +14,7 @@ if(!process.env.GOOGLE_SHEETS_DOC_ID || process.env.GOOGLE_SHEETS_DOC_ID == "") 
 }
 
 export const config = {
+  PORT: process.env.PORT || 3000,
   DISCORD_TOKEN: process.env.DISCORD_TOKEN!,
   GOOGLE_AUTH_EMAIL: process.env.GOOGLE_AUTH_EMAIL,
   GOOGLE_AUTH_KEY: process.env.GOOGLE_AUTH_KEY,
