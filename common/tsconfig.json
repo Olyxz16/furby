@@ -8,11 +8,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../common/*"]
+      "@/*": ["./*"]
     }
   },
-  "ts-node": {
-    "require": ["tsconfig-paths/register"]
-  },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts", "build.js"]
 }

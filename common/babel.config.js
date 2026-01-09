@@ -9,7 +9,7 @@ module.exports = {
       {
         root: ['.'],
         alias: {
-          '@': '../common',
+          '@': '.',
         },
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
