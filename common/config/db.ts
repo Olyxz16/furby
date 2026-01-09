@@ -7,7 +7,7 @@ const pool = new Pool({
   host: config.DB_HOST,
   database: config.DB_NAME,
   password: config.DB_PASSWORD,
-  port: parseInt(config.DB_PORT || '5432'),
+  port: config.DB_PORT,
 });
 
 const MIGRATE = process.env.MIGRATE;

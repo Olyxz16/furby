@@ -1,4 +1,4 @@
-import { GetUserByIdDto, GetUserByMailDto, RemoveDiscordIdDto, SetDiscordIdDto, UserCreateDto } from './dto/user.dto';
+import { getUserByDiscordIdDto, GetUserByIdDto, GetUserByMailDto, RemoveDiscordIdDto, SetDiscordIdDto, UserCreateDto } from './dto/user.dto';
 import { User } from './user.entity';
 import db from '../config/db';
 
@@ -139,6 +139,37 @@ export async function setDiscordId(input: SetDiscordIdDto): Promise<User> {
   } catch(err: any) {
     if(err.code === '23505') {
       throw new Error('This discord account is already linked to another user.');
+    }
+    throw err;
+  }
+}
+
+export async function getUserByDiscordId(input: getUserByDiscordIdDto): Promise<User> {
+  const query = `
+    SELECT id, mail, password, role, discord_user_id, created_at, updated_at FROM Users
+    WHERE discord_user_id = $1;
+  `;
+
+  try {
+    const res = await db.query(query, [input.discordId]);
+    const row = res.rows[0];
+    
+    if(!row) {
+      throw new Error(`User not found for discord id ${input.discordId}`);
+    }
+
+    return {
+      id: row.id,
+      mail: row.mail,
+      password: row.password,
+      role: row.role,
+      discordUserId: row.discord_user_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  } catch(err: any) {
+    if(err.code === '23505') {
+      throw new Error('User with this id does not exist');
     }
     throw err;
   }

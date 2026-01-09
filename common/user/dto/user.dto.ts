@@ -16,6 +16,14 @@ export interface GetUserByMailDto {
   mail: string;
 }
 
+export interface getUserByDiscordIdDto {
+  discordId: string;
+}
+
+export interface GetAgendaFromDiscordIdDto {
+  discordId: string;
+}
+
 export interface SetDiscordIdDto {
   userId: number;
   discordUserId: string;
