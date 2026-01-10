@@ -9,6 +9,7 @@
   "scripts": {
     "start:api": "DOTENV_CONFIG_PATH=../.env npm run start -w api",
     "build:api": "npm run build -w api",
+    "deploy:frontend": "npm run pages:deploy -w frontend",
     "start:bot": "DOTENV_CONFIG_PATH=../.env npm run start -w discord",
     "build:bot": "npm run build -w discord"
   },
