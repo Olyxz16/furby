@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "@furby/common": "*",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
