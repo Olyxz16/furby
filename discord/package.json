@@ -4,13 +4,18 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "start": "ts-node ./index.ts"
+    "start": "ts-node ./index.ts",
+    "build": "node build.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@furby/common": "*",
     "discord.js": "^14.25.1",
-    "@furby/common": "*"
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
   }
 }
