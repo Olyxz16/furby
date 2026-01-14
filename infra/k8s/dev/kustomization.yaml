@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../api/deployment.yaml
+  - ../api/service.yaml
+  - ../api/config.yaml
+  - ../discord/deployment.yaml
+  - ../discord/config.yaml
+  - ../postgres/postgres.yaml
+  - ../postgres/service.yaml
+
+patches:
+  - target:
+      kind: Deployment
+      name: api-deployment
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: api-deployment
+      spec:
+        template:
+          spec:
+            containers:
+              - name: api
+                image: furby-api:local
+                imagePullPolicy: Never
+
+  - target:
+      kind: Deployment
+      name: bot-deployment
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: bot-deployment
+      spec:
+        template:
+          spec:
+            containers:
+              - name: bot
+                image: furby-bot:local
+                imagePullPolicy: Never

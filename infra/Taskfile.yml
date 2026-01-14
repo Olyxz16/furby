@@ -1,0 +1,70 @@
+version: '3'
+
+vars:
+  K8S_DIR: k8s
+  PROJECT_ROOT: ".."
+
+tasks:
+  default:
+    desc: "Affiche la liste des tâches"
+    cmds:
+      - task --list
+
+  # 🚀 Tâche principale : Tout déployer (Build optionnel avant)
+  up:
+    desc: "Déploie la stack complète en mode DEV (Secrets + DB + Apps)"
+    cmds:
+      - task: secrets
+      - task: apps
+      - echo "✅ Tout est déployé ! Lance 'task status' pour vérifier."
+
+  # 🛑 Nettoyage
+  down:
+    desc: "Supprime toutes les ressources du cluster"
+    cmds:
+      # Supprime ce qui est défini dans Kustomize (Deployments, Services, StatefulSet)
+      - kubectl delete -k {{.K8S_DIR}}/dev --ignore-not-found
+      # Supprime les secrets (qui ne sont pas dans Kustomize)
+      - kubectl delete secret api-secret bot-secret --ignore-not-found
+      - echo "🗑️ Cluster nettoyé."
+
+  # 🏗️ Build des images (À lancer si tu modifies le code TS)
+  build:
+    desc: "Construit les images API et Bot localement (Nécessite 'eval $(minikube docker-env)')"
+    cmds:
+      - echo "🐳 Construction de l'image API..."
+      - docker build -t furby-api:local -f docker/api/Dockerfile {{.PROJECT_ROOT}}
+      
+      - echo "🐳 Construction de l'image Bot..."
+      - docker build -t furby-bot:local -f docker/discord/Dockerfile {{.PROJECT_ROOT}}
+      
+      - echo "✅ Images 'local' prêtes dans Minikube."
+
+  # 🔐 Secrets (SOPS)
+  secrets:
+    desc: "Déchiffre et applique les secrets (Mode verbeux)"
+    cmds:
+      - echo "🧐 Recherche des fichiers secrets.yaml dans {{.K8S_DIR}}..."
+      # On force l'affichage des fichiers trouvés
+      - find {{.K8S_DIR}} -name "secrets.yaml" -print
+      
+      - echo "🔓 Application..."
+      # On utilise une boucle for pour voir les erreurs de chaque fichier
+      - |
+        for file in $(find {{.K8S_DIR}} -name "secrets.yaml"); do
+          echo "Traitement de $file ..."
+          sops -d "$file" | kubectl apply -f - || exit 1
+        done
+
+  # 📦 Applications & DB (Via Kustomize Dev Overlay)
+  apps:
+    desc: "Applique la config DEV (Postgres + API + Bot)"
+    cmds:
+      - echo "🚀 Déploiement via Kustomize (Overlay Dev)..."
+      - kubectl kustomize --load-restrictor LoadRestrictionsNone {{.K8S_DIR}}/dev | kubectl apply -f -
+
+  # 🛠️ Vérification
+  status:
+    desc: "Affiche l'état des Pods, Services et Logs"
+    cmds:
+      - kubectl get pods,svc
