@@ -11,4 +11,4 @@ spec:
   wait: true
   sourceRef:
     kind: GitRepository
-    name: furby-repo
+    name: flux-system
