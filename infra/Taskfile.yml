@@ -14,6 +14,7 @@ tasks:
   up:
     desc: "Déploie la stack complète en mode DEV (Secrets + DB + Apps)"
     cmds:
+      - task: install
       - task: secrets
       - task: apps
       - echo "✅ Tout est déployé ! Lance 'task status' pour vérifier."
@@ -39,6 +40,36 @@ tasks:
       - docker build -t furby-bot:local -f docker/discord/Dockerfile {{.PROJECT_ROOT}}
       
       - echo "✅ Images 'local' prêtes dans Minikube."
+
+  install:
+    desc: "Installe Cert-Manager via Helm avec la config propre"
+    cmds:
+      - echo "📦 Mise à jour des repos Helm..."
+      - helm repo add jetstack https://charts.jetstack.io
+      - helm repo update
+
+      - echo "🚀 Installation de Cert-Manager (v1.16.2)..."
+      # upgrade --install : Installe si absent, met à jour si présent (Idempotent)
+      - |
+        helm upgrade --install cert-manager jetstack/cert-manager \
+        --namespace cert-manager \
+        --create-namespace \
+        --version v1.16.2 \
+        --values {{.K8S_DIR}}/cert-manager/values.yaml \
+        --wait
+
+      - echo "✅ Cert-Manager est prêt !"
+
+      - echo "🚦 Installation de Traefik..."
+      - helm repo add traefik https://traefik.github.io/charts
+      - helm repo update
+      - |
+        helm upgrade --install traefik traefik/traefik \
+        --namespace traefik \
+        --create-namespace \
+        --set ports.web.nodePort=30080 \
+        --set ports.websecure.nodePort=30443 \
+        --wait
 
   # 🔐 Secrets (SOPS)
   secrets:

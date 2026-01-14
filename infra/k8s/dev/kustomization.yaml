@@ -5,10 +5,12 @@ resources:
   - ../api/deployment.yaml
   - ../api/service.yaml
   - ../api/config.yaml
+  - ../api/ingress.yaml
   - ../discord/deployment.yaml
   - ../discord/config.yaml
   - ../postgres/postgres.yaml
   - ../postgres/service.yaml
+  - ../cert-manager/issuer-prod.yaml
 
 patches:
   - target:
