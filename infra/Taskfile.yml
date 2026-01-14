@@ -1,0 +1,101 @@
+version: '3'
+
+vars:
+  K8S_DIR: k8s
+  PROJECT_ROOT: ".."
+
+tasks:
+  default:
+    desc: "Affiche la liste des tâches"
+    cmds:
+      - task --list
+
+  # 🚀 Tâche principale : Tout déployer (Build optionnel avant)
+  up:
+    desc: "Déploie la stack complète en mode DEV (Secrets + DB + Apps)"
+    cmds:
+      - task: install
+      - task: secrets
+      - task: apps
+      - echo "✅ Tout est déployé ! Lance 'task status' pour vérifier."
+
+  # 🛑 Nettoyage
+  down:
+    desc: "Supprime toutes les ressources du cluster"
+    cmds:
+      # Supprime ce qui est défini dans Kustomize (Deployments, Services, StatefulSet)
+      - kubectl delete -k {{.K8S_DIR}}/dev --ignore-not-found
+      # Supprime les secrets (qui ne sont pas dans Kustomize)
+      - kubectl delete secret api-secret bot-secret --ignore-not-found
+      - echo "🗑️ Cluster nettoyé."
+
+  # 🏗️ Build des images (À lancer si tu modifies le code TS)
+  build:
+    desc: "Construit les images API et Bot localement (Nécessite 'eval $(minikube docker-env)')"
+    cmds:
+      - echo "🐳 Construction de l'image API..."
+      - docker build -t furby-api:local -f docker/api/Dockerfile {{.PROJECT_ROOT}}
+      
+      - echo "🐳 Construction de l'image Bot..."
+      - docker build -t furby-bot:local -f docker/discord/Dockerfile {{.PROJECT_ROOT}}
+      
+      - echo "✅ Images 'local' prêtes dans Minikube."
+
+  install:
+    desc: "Installe Cert-Manager via Helm avec la config propre"
+    cmds:
+      - echo "📦 Mise à jour des repos Helm..."
+      - helm repo add jetstack https://charts.jetstack.io
+      - helm repo update
+
+      - echo "🚀 Installation de Cert-Manager (v1.16.2)..."
+      # upgrade --install : Installe si absent, met à jour si présent (Idempotent)
+      - |
+        helm upgrade --install cert-manager jetstack/cert-manager \
+        --namespace cert-manager \
+        --create-namespace \
+        --version v1.16.2 \
+        --values {{.K8S_DIR}}/cert-manager/values.yaml \
+        --wait
+
+      - echo "✅ Cert-Manager est prêt !"
+
+      - echo "🚦 Installation de Traefik..."
+      - helm repo add traefik https://traefik.github.io/charts
+      - helm repo update
+      - |
+        helm upgrade --install traefik traefik/traefik \
+        --namespace traefik \
+        --create-namespace \
+        --set ports.web.nodePort=30080 \
+        --set ports.websecure.nodePort=30443 \
+        --wait
+
+  # 🔐 Secrets (SOPS)
+  secrets:
+    desc: "Déchiffre et applique les secrets (Mode verbeux)"
+    cmds:
+      - echo "🧐 Recherche des fichiers secrets.yaml dans {{.K8S_DIR}}..."
+      # On force l'affichage des fichiers trouvés
+      - find {{.K8S_DIR}} -name "secrets.yaml" -print
+      
+      - echo "🔓 Application..."
+      # On utilise une boucle for pour voir les erreurs de chaque fichier
+      - |
+        for file in $(find {{.K8S_DIR}} -name "secrets.yaml"); do
+          echo "Traitement de $file ..."
+          sops -d "$file" | kubectl apply -f - || exit 1
+        done
+
+  # 📦 Applications & DB (Via Kustomize Dev Overlay)
+  apps:
+    desc: "Applique la config DEV (Postgres + API + Bot)"
+    cmds:
+      - echo "🚀 Déploiement via Kustomize (Overlay Dev)..."
+      - kubectl kustomize --load-restrictor LoadRestrictionsNone {{.K8S_DIR}}/dev | kubectl apply -f -
+
+  # 🛠️ Vérification
+  status:
+    desc: "Affiche l'état des Pods, Services et Logs"
+    cmds:
+      - kubectl get pods,svc

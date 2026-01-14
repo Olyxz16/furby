@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  labels:
+    app: furby-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: furby-api
+  template:
+    metadata:
+      labels:
+        app: furby-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/olyxz16/furby/api:latest
+          envFrom:
+            - configMapRef:
+                name: api-config
+            - secretRef:
+                name: api-secret
+          ports:
+            - containerPort: 3000
