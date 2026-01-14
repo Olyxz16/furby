@@ -8,3 +8,5 @@ spec:
   ref:
     branch: main
   url: https://github.com/Olyxz16/furby
+  secretRef:
+    name: flux-system
