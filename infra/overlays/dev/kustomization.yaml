@@ -7,6 +7,7 @@ commonLabels:
   environment: dev
 
 resources:
+  - namespace.yaml
   - ../../base/postgres
   - ../../base/api
   - ../../base/discord
