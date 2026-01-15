@@ -1,4 +1,11 @@
 name = "furby-frontend"
 compatibility_date = "2024-09-26"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+pages_build_output_dir = ".open-next/assets"
+
+[vars]
+NEXT_PUBLIC_API_URL = "https://furby-api.olyxz16.fr"
+
+#[[routes]]
+#pattern = "/*"
+#zone_name = "furby.olyxz16.fr"

@@ -1,4 +1,4 @@
-# Setup
+# 1. Setup backend
 
 ## Secrets
 
@@ -22,7 +22,7 @@ kubectl create secret docker-registry ghcr-secret \
   --docker-server=ghcr.io \
   --docker-username=TON_USER_GITHUB \
   --docker-password=TON_TOKEN_FINE_GRAINED \
-  --docker-email=ton@email.com \
+  --docker-email=name@example.com \
   -n default
 ```
 
@@ -34,3 +34,33 @@ Permissions :
 - Administration: read+write
 - Contents: read+write
 - Metadata: read
+
+# 2. Setup frontend
+
+## Secrets
+
+### PUBLIC_API_URL
+
+furby-api.olyxz16.fr
+
+### CLOUDFLARE_API_TOKEN
+
+cloudflare > Profile > API Token > New Token
+Permissions : 
+- Cloudflare page: Edit
+
+### CLOUDFLARE_ACCOUNT_ID
+
+cloudflare > Account home > | > Copy account Id
+
+# 3. Monitoring
+
+## Uptime
+
+https://uptimerobot.com/
+
+## Sentry
+
+## Aggrégation de logs
+
+Stern / Better stack
