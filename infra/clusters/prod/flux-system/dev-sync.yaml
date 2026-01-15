@@ -28,3 +28,7 @@ spec:
     kind: GitRepository
     name: furby-repo-ops
   targetNamespace: dev
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
