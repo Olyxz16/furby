@@ -14,6 +14,8 @@ spec:
       labels:
         app: furby-bot
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: bot
           image: ghcr.io/olyxz16/furby/bot:latest
