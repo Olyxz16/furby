@@ -6,7 +6,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m0s
-  url: https://github.com/Olyxz16/furby
+  url: ssh://git@github.com/Olyxz16/furby
   ref:
     branch: ops
   secretRef:
