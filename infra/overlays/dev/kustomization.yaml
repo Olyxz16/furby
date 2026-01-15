@@ -29,6 +29,9 @@ patches:
               - name: api
                 image: furby-api:local
                 imagePullPolicy: Never
+                env:
+                  - name: DB_HOST
+                    value: dev-postgres
 
   - target:
       kind: Deployment
@@ -45,3 +48,27 @@ patches:
               - name: bot
                 image: furby-bot:local
                 imagePullPolicy: Never
+
+  - target:
+      kind: ConfigMap
+      name: api-config
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: api-config
+      data:
+        DB_HOST: dev-postgres
+
+  - target:
+      kind: Ingress
+      name: api-ingress
+    patch: |-
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: api-ingress
+      spec:
+        rules:
+          - host: furby-dev.olyxz16.fr
+        tls: []

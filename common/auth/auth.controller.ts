@@ -1,7 +1,8 @@
 import express, { Response } from "express";
-import { Login, Logout, SignIn } from "./auth.service";
+import { CreateMagicLink, Login, Logout, SignIn } from "./auth.service";
 import { toUserDto } from "../user/dto/user.dto";
 import { AuthenticatedRequest } from "./types";
+import { randomBytes } from "crypto";
 
 export const authRouter = express.Router();
 
@@ -42,6 +43,22 @@ authRouter.post("/logout", async (req: AuthenticatedRequest, res: Response) => {
     await Logout({ token: token });
     res.clearCookie("session");
     res.status(200).json({"status": "ok"});
+  } catch(err) {
+    console.error(err);
+    return res.status(500).json({"error": "Internal server error"});
+  }
+});
+
+authRouter.post("/magic-link", async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if(!user) {
+    return res.status(401).json({"error": "Unauthorized"});
+  }
+
+  try {
+    const link = randomBytes(16).toString('hex');
+    const magicLink = await CreateMagicLink({ userId: user.id, link });
+    res.status(201).json({ link: magicLink.link });
   } catch(err) {
     console.error(err);
     return res.status(500).json({"error": "Internal server error"});
