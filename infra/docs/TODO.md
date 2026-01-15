@@ -3,13 +3,14 @@
 ## Roadmap
 
 - [ ] Déployer le front sur cloudflare
-- [ ] Créer un Ingress comme porte d'entrée
-- [ ] Setup le cluster (clé sops...)
-- [ ] Config le DNS
-- [ ] Rajouter GitOps
+- [X] Créer un Ingress comme porte d'entrée
+- [X] Setup le cluster (clé sops...)
+- [X] Rajouter GitOps
 - [ ] Rajouter Backup
-- [ ] Déployer le cluster
+- [ ] Déployer le cluster + setup DNS
 - [ ] Rajouter du monitoring
+- [ ] Remplacer Postgres manuel par helm
+- [ ] CI vérification envoie de secrets non chiffrés (pre-commit ?)
 
 ## Fix
 
