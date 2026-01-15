@@ -1,16 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: dev
+namePrefix: dev-
+commonLabels:
+  environment: dev
+
 resources:
-  - ../api/deployment.yaml
-  - ../api/service.yaml
-  - ../api/config.yaml
-  - ../api/ingress.yaml
-  - ../discord/deployment.yaml
-  - ../discord/config.yaml
-  - ../postgres/postgres.yaml
-  - ../postgres/service.yaml
-  - ../cert-manager/issuer-prod.yaml
+  - ../../base/postgres
+  - ../../base/api
+  - ../../base/discord
+  - ../../base/cert-manager
 
 patches:
   - target:
