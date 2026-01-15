@@ -99,3 +99,11 @@ tasks:
     desc: "Affiche l'état des Pods, Services et Logs"
     cmds:
       - kubectl get pods,svc
+
+  bootstrap-flux:
+    desc: "Injecte la clé de déchiffrement SOPS dans Flux (À faire une seule fois par cluster)"
+    cmds:
+      - echo "🔑 Injection de la clé Age dans le namespace flux-system..."
+      # Assure-toi que keys.txt est bien dans ton .gitignore !
+      - cat ../keys.txt | kubectl create secret generic sops-age --namespace=flux-system --from-file=age.agekey=/dev/stdin
+      - echo "✅ Clé injectée ! Flux peut maintenant déchiffrer."
