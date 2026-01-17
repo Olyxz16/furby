@@ -8,6 +8,12 @@ export enum Day {
 
 export type Hour = 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17;
 
+export interface AgendaIdentifier {
+  id?: string;
+  agenda_id: string;
+  user_id: string;
+}
+
 export class Agenda {
   #schedule : Map<Day, Map<Hour, string>>;
 

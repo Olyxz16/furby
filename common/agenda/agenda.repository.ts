@@ -1,7 +1,7 @@
 import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 import { config } from '../config/config';
-import { Agenda, Day, Hour } from './agenda.entity';
+import { Agenda, AgendaIdentifier, Day, Hour } from './agenda.entity';
 import { GetAgendaIdByUserIdDto, LinkAgendaToUserDto } from './dto/agenda.dto';
 import db from "../config/db";
 
@@ -12,21 +12,33 @@ const jwt = new JWT({
 });
 const doc = new GoogleSpreadsheet(config.GOOGLE_SHEETS_DOC_ID, jwt);
 
-export async function getUsers() : Promise<string[]> {
+export async function listAgendas(): Promise<AgendaIdentifier[]> {
   await doc.loadInfo();
   const sheet = doc.sheetsById[1871304734];
   await sheet.loadCells(); 
 
   let result = [];
   for(let i = 0 ; i < sheet.rowCount ; i++) {
-      const value = sheet.getCell(i, 0).value;
-      if(!value) {
-        break;
-      }
-      result.push(value.toString());
+    const student = sheet.getCell(i, 0).value;
+    if(!student) {
+      break;
+    }
+    const id = sheet.getCell(i, 1).value;
+    if(!id) {
+      break;
+    }
+    result.push({
+      agenda_id: id.toString(),
+      user_id: student.toString()
+    });
   }
 
   return result;
+}
+
+export async function getUsers() : Promise<string[]> {
+  const agendas = await listAgendas();
+  return agendas.map(pair => pair.user_id);
 }
 
 export async function getAgendaFromId(id: string): Promise<Agenda> {
@@ -142,15 +154,22 @@ async function getSheetById(id: string): Promise<GoogleSpreadsheetWorksheet | un
   return undefined;
 }
 
-export async function linkAgendaToUser(input: LinkAgendaToUserDto): Promise<void> {
+export async function linkAgendaToUser(input: LinkAgendaToUserDto): Promise<AgendaIdentifier> {
   const query = `
     INSERT INTO Agendas (user_id, agenda_id)
     VALUES ($1, $2)
     ON CONFLICT(user_id) DO UPDATE SET
       agenda_id = excluded.agenda_id
+    RETURNING id, agenda_id, user_id;
   `;
   
-  await db.query(query, [input.userId, input.agendaId]);
+  const res = await db.query(query, [input.userId, input.agendaId]);
+  const row = res.rows[0] as AgendaIdentifier;
+  if (!row) {
+    throw new Error("Missing agenda");
+  }
+
+  return row;
 }
 
 export async function getAgendaIdByUserId(input: GetAgendaIdByUserIdDto): Promise<string> {
