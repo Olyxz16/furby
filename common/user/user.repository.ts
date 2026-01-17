@@ -112,6 +112,17 @@ export async function getByMail(input: GetUserByMailDto): Promise<User|undefined
   }
 }
 
+export async function getAll(): Promise<Pick<User, 'id' | 'mail'>[]> {
+  const query = `
+    SELECT id, mail
+    FROM Users
+    ORDER BY id ASC;
+  `;
+
+  const res = await db.query(query, []);
+  return res.rows.map((row: any) => ({ id: row.id, mail: row.mail }));
+}
+
 export async function setDiscordId(input: SetDiscordIdDto): Promise<User> {
   const query = `
     UPDATE Users 
