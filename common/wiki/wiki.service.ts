@@ -1,18 +1,18 @@
-import {scrapesImages } from "./wiki.repository";
+import {scrapeImages } from "./wiki.repository";
 
 
 export async function getImages(url: string, selector: string)
 {
-    return scrapesImages(url, selector);
+    return scrapeImages(url, selector);
 }
 
 export async function getFeets(fname : string,lname:string) : Promise<string>
 {
     try
     {
-        const urls = await scrapesImages(fname, lname);
+        const urls = await scrapeImages(fname, lname);
         if (urls.length == 0)
-            throw "pue sa mère";
+            throw "No feet found";
         return urls[Math.floor(Math.random() * urls.length)];
     }
     catch (err: any)

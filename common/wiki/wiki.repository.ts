@@ -1,59 +1,39 @@
-import axios from 'axios';
-import * as cheerio from 'cheerio';
+import { chromium } from "playwright";
 
-const formatName = (name: string): string =>
-{
-    if (!name)
-        return "";
+const formatName = (name: string): string => {
     const low = name.trim().toLowerCase();
     return low.charAt(0).toUpperCase() + low.slice(1);
 };
 
-export async function scrapesImages(firstName: string, lastName: string): Promise<string[]>
-{
+export async function scrapeImages(firstName: string, lastName: string): Promise<string[]> {
     const fName = formatName(firstName);
     const lName = formatName(lastName);
-    
-    const baseUrl = "https://men.wikifeet.com";
+    const pageUrl = `https://men.wikifeet.com/${fName}_${lName}`;
     const picsUrl = "https://pics.wikifeet.com";
-    const pageUrl = `${baseUrl}/${fName}_${lName}`;
 
-    try
-    {
-        const { data } = await axios.get(pageUrl,
-        {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7"
-            },
-            timeout: 10000,
-        });
+    const browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage({
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0"
+    });
 
-        const $ = cheerio.load(data);
-        const validImages: string[] = [];
-        
-        $("div[id^='pid_']").each((_, el) => {
-            const idAttr = $(el).attr("id");
-            
-            if (idAttr) {
-                const pidNumber = idAttr.replace("pid_", "");
-                const customUrl = `${picsUrl}/${fName}_${lName}-Feet-${pidNumber}.jpg`;
-                validImages.push(customUrl);
-            }
-        });
+    // ❗ NE PAS utiliser networkidle
+    await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-        if (validImages.length === 0)
-            throw new Error("Aucune image trouvée pour cette personne.");
-        
-        const randomIndex = Math.floor(Math.random() * validImages.length);
-        return [validImages[randomIndex]];
+    // Attendre que les div pid_ apparaissent
+    await page.waitForSelector("div[id^='pid_']", { timeout: 15000 });
 
+    const ids = await page.$$eval("div[id^='pid_']", divs =>
+        divs.map(d => d.id.replace("pid_", ""))
+    );
+
+    await browser.close();
+
+    if (ids.length === 0) {
+        throw new Error("No feet found");
     }
-    catch (error: any)
-    {
-        if (axios.isAxiosError(error) && error.response?.status === 404)
-            throw new Error(`Le profil de ${fName} ${lName} est introuvable.`);
-        
-        throw error;
-    }
+
+    const images = ids.map(id => `${picsUrl}/${fName}-${lName}-Feet-${id}.jpg`);
+    const random = images[Math.floor(Math.random() * images.length)];
+
+    return [random];
 }
