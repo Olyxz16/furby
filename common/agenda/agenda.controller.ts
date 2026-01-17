@@ -25,7 +25,7 @@ agendaRouter.get("/me", (req: AuthenticatedRequest, res: Response) => {
     });
 });
 
-agendaRouter.post("/link", (req: AuthenticatedRequest, res: Response) => {
+agendaRouter.post("/link", async (req: AuthenticatedRequest, res: Response) => {
   const user = req.user;
   if(!user) {
     return res.status(401).json({"error": "Unauthorized"});
@@ -33,11 +33,12 @@ agendaRouter.post("/link", (req: AuthenticatedRequest, res: Response) => {
 
   const { agendaId } = req.body;
 
-  const agenda = linkAgendaToUser({agendaId: agendaId, userId: user.id.toString()})
-  .then(agenda => toAgendaDto(agenda))
-  .catch(_ => res.status(400).json({"error": "Invalid agenda id"}));
-
-  res.status(200).json(agenda);
+  try {
+    const agenda = await linkAgendaToUser({agendaId: agendaId, userId: user.id.toString()});
+    res.status(200).json(toAgendaDto(agenda));
+  } catch (e) {
+    res.status(400).json({"error": "Invalid agenda id"});
+  }
 });
 
 agendaRouter.post("/", (req: AuthenticatedRequest, res: Response) => {
