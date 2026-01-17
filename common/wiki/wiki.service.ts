@@ -12,7 +12,7 @@ export async function getFeets(fname : string,lname:string) : Promise<string>
     {
         const urls = await scrapeImages(fname, lname);
         if (urls.length == 0)
-            throw "No feet found";
+            throw new Error ("No pictures found");
         return urls[Math.floor(Math.random() * urls.length)];
     }
     catch (err: any)

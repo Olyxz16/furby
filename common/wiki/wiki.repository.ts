@@ -16,10 +16,8 @@ export async function scrapeImages(firstName: string, lastName: string): Promise
         userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0"
     });
 
-    // ❗ NE PAS utiliser networkidle
     await page.goto(pageUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
 
-    // Attendre que les div pid_ apparaissent
     await page.waitForSelector("div[id^='pid_']", { timeout: 15000 });
 
     const ids = await page.$$eval("div[id^='pid_']", divs =>
@@ -29,7 +27,7 @@ export async function scrapeImages(firstName: string, lastName: string): Promise
     await browser.close();
 
     if (ids.length === 0) {
-        throw new Error("No feet found");
+        throw new Error ("No pictures found");
     }
 
     const images = ids.map(id => `${picsUrl}/${fName}-${lName}-Feet-${id}.jpg`);

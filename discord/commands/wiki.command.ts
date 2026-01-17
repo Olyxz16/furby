@@ -8,21 +8,21 @@ export const feetCommand: SlashCommand =
     .setName("feet")
     .setDescription("Provide random feet pictures")
     .addStringOption(option =>
-      option.setName("firstname") // MINUSCULES UNIQUEMENT, PAS D'ESPACE
+        option.setName("firstname")
         .setDescription("First name")
         .setRequired(true))
     .addStringOption(option =>
-      option.setName("lastname") // MINUSCULES UNIQUEMENT, PAS D'ESPACE
+        option.setName("lastname")
         .setDescription("Last name")
         .setRequired(true)) as any,
 
     execute: async (interaction: ChatInputCommandInteraction<CacheType>) =>
     {
+        const fname = interaction.options.getString("firstname", true);
+        const lname = interaction.options.getString("lastname", true);
+
         try
         {
-            const fname = interaction.options.getString("firstname", true);
-            const lname = interaction.options.getString("lastname", true);
-
             await interaction.deferReply();
 
             const urlImg = await getFeets(fname, lname);
@@ -35,9 +35,9 @@ export const feetCommand: SlashCommand =
         {
             console.error(error);
             if (interaction.deferred)
-                await interaction.editReply({ content: "Erreur lors de l'exécution" });
+                await interaction.editReply({ content: `Sorry bud couldn't find ${fname} ${lname}'s juicy feet` });
             else
-                await interaction.reply({ content: "Erreur", ephemeral: true });
+                await interaction.reply({ content: "Huh-hoh something went wrong", ephemeral: true });
             
         }
     }
