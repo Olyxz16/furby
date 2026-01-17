@@ -3,7 +3,7 @@ import styles from "./ui.module.css";
 export type Column<T> = {
   key: keyof T;
   header: string;
-  render?: (row: T) => string | number | JSX.Element;
+  render?: (row: T) => string | number;
 };
 
 type Props<T> = {

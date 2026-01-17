@@ -24,7 +24,6 @@ function agendaDtoToPlanning(dto: AgendaDto): PlanningSlot[] {
         time,
         subject,
         room: undefined,
-        updatedAt: new Date().toISOString()
       });
     }
   }
