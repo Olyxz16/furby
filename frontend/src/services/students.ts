@@ -5,6 +5,5 @@ type StudentDto = { id: string; firstName: string; lastName: string };
 
 export async function listStudents(): Promise<Student[]> {
   const dto = await apiFetch<StudentDto[]>("/students");
-  // Defensive: map/normalize
   return (dto || []).map((s) => ({ id: String(s.id), firstName: s.firstName || '', lastName: s.lastName || '' }));
 }
