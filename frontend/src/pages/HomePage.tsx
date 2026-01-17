@@ -25,29 +25,15 @@ export function HomePage() {
 
   return (
     <div style={{ maxWidth: 960, margin: "18px auto", padding: "0 12px" }}>
-      <h2>Planning</h2>
+      {loading && <div>Loading students…</div>}
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-        <button onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index <= 0}>
-          ◀
-        </button>
+      {!loading && students.length === 0 && (
+        <div>No students available.</div>
+      )}
 
-        <div style={{ flex: 1 }}>
-          {loading ? (
-            <div style={{ opacity: 0.7 }}>Loading students…</div>
-          ) : (
-            <div style={{ fontSize: 16 }}>{current ? `${current.firstName} ${current.lastName}` : "No student"}</div>
-          )}
-        </div>
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => setIndex((i) => Math.min(students.length - 1, i + 1))} disabled={index >= students.length - 1}>
-            ▶
-          </button>
-        </div>
-      </div>
-
-      <PlanningPage studentId={current?.id} />
+      {!loading && students.length > 0 && (
+        <PlanningPage studentId={current?.id} />
+      )}
     </div>
   );
 }

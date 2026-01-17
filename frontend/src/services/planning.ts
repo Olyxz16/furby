@@ -32,9 +32,6 @@ function agendaDtoToPlanning(dto: AgendaDto): PlanningSlot[] {
 }
 
 export async function listPlanningSlots(): Promise<PlanningSlot[]> {
-  // Fetch the authenticated user's agenda from the API.
-  // If anything goes wrong (network, auth, parsing), propagate the error so the UI
-  // can decide whether to show an error or fallback to mock data explicitly.
   const dto = await apiFetch<AgendaDto>("/agendas/me");
   if (dto && Array.isArray(dto.data)) {
     return agendaDtoToPlanning(dto);

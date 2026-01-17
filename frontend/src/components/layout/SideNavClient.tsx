@@ -6,7 +6,6 @@ import styles from "./layout.module.css";
 
 const items = [
   { label: "Home", to: "/" },
-  { label: "Planning", to: "/planning" }
 ];
 
 export function SideNavClient() {
