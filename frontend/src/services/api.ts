@@ -7,9 +7,8 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const url = `${BASE_URL}${path}`;
 
-  console.log("=== apiFetch ===");
-  console.log("URL:", url);
-  console.log("Options:", options);
+  console.log("[apiFetch] URL:", url);
+  console.log("[apiFetch] options:", options);
 
   let res: Response;
   try {
@@ -22,24 +21,23 @@ export async function apiFetch<T>(
       ...options,
     });
   } catch (err) {
-    console.error("NETWORK ERROR (no server / wrong port)");
-    console.error(err);
+    console.error("[apiFetch] NETWORK ERROR", err);
     throw err;
   }
 
-  console.log("HTTP status:", res.status);
+  console.log("[apiFetch] status:", res.status);
 
-  const text = await res.text();
-  console.log("Raw response:", text);
+  const txt = await res.text();
+  console.log("[apiFetch] raw response:", txt);
 
   if (!res.ok) {
-    throw new Error(`API error ${res.status}: ${text}`);
+    throw new Error(`API error ${res.status}: ${txt}`);
   }
 
   try {
-    return text ? JSON.parse(text) : (null as unknown as T);
+    return txt ? JSON.parse(txt) : (null as unknown as T);
   } catch {
-    throw new Error("JSON parse failed");
+    throw new Error("Failed to parse JSON response");
   }
 }
 
