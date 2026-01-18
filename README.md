@@ -1,104 +1,122 @@
-### WEB PROJECT ###
+# **Documentation Technique & Architecture \- Projet Furby**
 
----------------------------------------------------------------------------------------------------
+**À l'attention de l'équipe pédagogique / correcteur**  
+Ce document a pour but de détailler les choix techniques, l'architecture du monorepo, la stratégie de déploiement (GitOps/K8s) et l'implémentation des fonctionnalités.
 
+## **Architecture Globale : Le Monorepo**
 
-# Partie 1 : Bot Discord
+Le projet est architecturé sous forme de **Monorepo** géré par **NPM Workspaces**. Ce choix nous permet de partager du code, des types et de la logique métier entre les différents services (API et Bot Discord) sans duplication, tout en maintenant une séparation claire des responsabilités.
 
-Bot Discord développé en TypeScript, structuré de manière modulaire afin de séparer clairement
-la gestion du client Discord, des événements, des commandes et des tâches planifiées.
+### **Structure des Workspaces**
 
-### `discord.module.ts`
-    Fournit une instance unique du client Discord.
+graph TD  
+    Root\[Monorepo Root\] \--\> Common\[📦 common (Shared Library)\]  
+    Root \--\> API\[🚀 api (Backend REST)\]  
+    Root \--\> Discord\[🤖 discord (Bot Service)\]  
+    Root \--\> Frontend\[💻 frontend (Next.js)\]  
+    Root \--\> Tests\[🧪 tests/integration\]  
+      
+    API \--\>|Import| Common  
+    Discord \--\>|Import| Common  
+    Frontend \--\>|HTTP Calls| API
 
-    Ce module :
-    - centralise la configuration du client
-    - évite la création de multiples instances
-    - permet au reste de l’application d’accéder au client de manière contrôlée
+* **common/** : Le cœur du backend. Ce paquet contient :  
+  * **Entities & DTOs** : Les définitions de types TypeScript partagées.  
+  * **Repositories** : L'accès direct à la base de données (PostgreSQL).  
+  * **Services** : La logique métier pure (ex: AuthService, AgendaService).  
+  * *Avantage* : Si nous changeons une règle métier, l'API et le Bot Discord sont mis à jour simultanément.  
+* **api/** : Une couche de transport légère (HTTP/REST) qui expose les services de common.  
+* **discord/** : Une interface utilisateur alternative via Discord qui consomme les mêmes services de common.  
+* **frontend/** : L'interface web utilisateur.
 
+## **Détail des Composants**
 
-## ---- Gestion des événements ---- 
+### **1\. Le Frontend (/frontend)**
 
-### `message.event.ts`
-    Gère les messages texte classiques envoyés dans les salons.
+* **Framework** : **Next.js** (App Router) pour bénéficier du SSR et d'une structure de routing moderne.  
+* **Langage** : TypeScript strict.  
+* **Styling** : CSS Modules et Tailwind (inféré via globals.css).  
+* **Architecture** :  
+  * src/services/ : Abstraction des appels API (pattern Adapter).  
+  * src/components/ : Composants UI réutilisables (Card, DataTable, etc.).  
+  * **Déploiement** : Configuration via open-next.config.ts pour une optimisation serverless si nécessaire, et pipeline GitHub Actions dédié (deploy-frontend.yml).
 
-### `interaction.event.ts`
-    Gère les interactions Discord, principalement les slash commands.
+### **2\. Le Backend (/api)**
 
-## ---- Système de commandes ---- 
+* **Framework** : Node.js avec un serveur HTTP custom (basé sur l'analyse de server.ts).  
+* **Rôle** : Agit comme contrôleur. Il reçoit les requêtes HTTP, valide les entrées, appelle les services de common, et retourne les réponses formatées.  
+* **Sécurité** : Middleware de session (session.middleware.ts) pour gérer l'authentification.
 
-### `command.registry.ts`
-    Registre et centralise toutes les commandes du bot.
+### **3\. Le Bot Discord (/discord)**
 
-    Objectif :
-    - faire le lien entre Discord et l’implémentation des commandes
-    - servir de point unique de routing pour les interactions
-    - faciliter l’ajout de nouvelles commandes
+* **Librairie** : Probablement discord.js.  
+* **Features** :  
+  * **Commandes Slash** : Architecture modulaire (command.registry.ts). Chaque commande (agenda, link, feur) est isolée.  
+  * **Events** : Gestionnaire d'événements (interaction.event.ts, message.event.ts).  
+  * **Cron Jobs** : Tâches planifiées (ex: cron.mardi.ts) pour envoyer des rappels automatiques.  
+* **Intégration** : Utilise directement la BDD via common pour lier les comptes Discord aux utilisateurs de l'application (link.command.ts).
 
-### ---- Embeds ---- 
+### **4\. La Librairie Commune (/common)**
 
-#### `hello.embed.ts`
-    Contient uniquement la construction d’un embed Discord.
+* **Database** : PostgreSQL.  
+* **Pattern** : Utilisation du **Repository Pattern** (user.repository.ts, agenda.repository.ts) pour abstraire les requêtes SQL.  
+* **Migration** : Le schéma est défini dans schema.sql.
 
+## **Infrastructure & DevOps**
 
----------------------------------------------------------------------------------------------------
+L'infrastructure est un point fort du projet, utilisant une approche moderne **Cloud Native**.
 
+### **Docker & Environnement Local**
 
-# Partie 2 : Frontend
+Le développement local est orchestré par docker-compose.yml qui monte :
 
-L’implémentation complète de l’authentification et de certaines interactions frontend–backend n’a pas pu être finalisée.
-La structure du frontend, la navigation et les appels API ont néanmoins été mis en place afin de démontrer l’architecture prévue, mais puisque l'authetification ne marche pas le Frontend est inutilisable. 
+1. Une base de données **PostgreSQL**.  
+2. L'API.  
+3. Le Bot Discord.  
+4. Le Frontend.
 
-## Architecture générale
-    Le frontend est organisé autour de quatre type d'élément principaux :
+### **Kubernetes & GitOps (FluxCD)**
 
-    - **Pages** : vues principales de l’application
-    - **Services** : communication avec l’API backend
-    - **Composants UI** : éléments visuels réutilisables
-    - **Routing** : gestion de la navigation côté client
+Le déploiement en production ne se fait pas via des scripts manuels ("ClickOps"), mais via une approche **GitOps** avec **FluxCD**.
 
+* **Kustomize** : La configuration Kubernetes est gérée via Kustomize pour gérer les différences entre environnements (infra/overlays/dev vs infra/overlays/prod).  
+  * *Base* : Définitions communes (Deployment, Service, Ingress).  
+  * *Overlays* : Patchs spécifiques (namespace, replica count, secrets).  
+* **FluxCD (infra/clusters/prod/flux-system)** :  
+  * Flux surveille le dépôt Git.  
+  * Dès qu'un changement est poussé sur la branche main (ou tag), Flux synchronise l'état du cluster K8s pour qu'il corresponde au code.  
+* **Composants Infra** :  
+  * **Cert-Manager** : Gestion automatique des certificats SSL (Let's Encrypt) via issuer-prod.yaml.  
+  * **Ingress** : Routage du trafic HTTP vers l'API.
 
-## ---- Pages ---- 
+### **CI/CD (GitHub Actions)**
 
-### `HomePage.tsx`
-    Page principale de l’application.
+* **Publish** : Build et push des images Docker sur un registre.  
+* **Deploy Frontend** : Déploiement spécifique du front (souvent découplé du cycle de vie K8s pour Next.js sur certaines plateformes comme Vercel, ou intégré via conteneur).
 
-    Objectif :
-    - point d’entrée de l’utilisateur après le chargement de l’application
-    - déclenchement des appels API nécessaires à l’affichage des données
+## **Fonctionnalités Implémentées**
 
-### `PlanningPage.tsx`
-    Affiche le planning de l’utilisateur connecté.
+### **Authentification & Sécurité**
 
-### `LoginPage.tsx`
-    Page d’authentification.
+* **Magic Link** : Pas de mot de passe stocké. Un lien de connexion est envoyé (simulé ou réel), géré par AuthService et MagicLinkRepository.  
+* **Session** : Gestion de session sécurisée stockée en base.  
+* **Account Linking** : Possibilité de lier son compte Discord à son profil étudiant via une commande sécurisée.
 
+### **Gestion Pédagogique (Planning & Étudiants)**
 
-### `NotFoundPage.tsx`
-    Page 404 affichée lorsque la route demandée n’existe pas.
+* Visualisation du planning (PlanningPage.tsx).  
+* Gestion des étudiants et de leurs données.  
+* Intégration bidirectionnelle : Le planning est consultable sur le Web et sur Discord.
 
+### **Interaction Discord**
 
-## ---- Routing ---- 
+* Commandes utilitaires et "fun" (feur, hello).  
+* Rappels automatiques via Cron jobs.
 
-### `App.tsx`
-    Point central de la navigation de l’application.
+## **Qualité Code & Tests**
 
-    Objectif :
-    - définit les routes publiques et privées
-    - encapsule l’application dans le layout principal
-    - délègue la gestion réelle de l’authentification au backend
-
-
-## ---- Services API ---- 
-
-### `api.ts`
-    Point d’accès à l’API backend.
-
-### `students.ts`
-    Service dédié à la récupération des étudiants.
-
-### `planning.ts`
-    Service dédié à la récupération du planning utilisateur.
-
-## Producted by
-SAZOS Cédric - LARONDE Mathis - TARZI Naïm
+* **Tests Unitaires** : Présents dans les dossiers services (ex: agenda.service.spec.ts, auth.service.spec.ts). Exécutés via Jest.  
+* **Tests d'Intégration** : Dossier dédié tests/integration/ couvrant des scénarios complets :  
+  * auth-flow.hurl : Test des endpoints HTTP.  
+  * full-flow.test.ts : Simulation de parcours utilisateur complet.  
+* **Typage** : TypeScript est utilisé partout avec des DTOs stricts (.dto.ts) pour valider les données entrant et sortant.
