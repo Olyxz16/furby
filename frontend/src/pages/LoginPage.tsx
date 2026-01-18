@@ -2,35 +2,26 @@
 
 import React, { useState } from "react";
 import { login, signin } from "../services/auth";
+import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  async function handleSubmit() {
-    setLoading(true);
+  async function submit() {
     setError(null);
-
     try {
       if (mode === "login") {
         await login(mail, password);
       } else {
         await signin(mail, password);
       }
-
-      // backend sets session cookie → redirect
-      window.location.href = "/";
+      navigate("/");
     } catch {
-      setError(
-        mode === "login"
-          ? "Invalid email or password"
-          : "Unable to create account"
-      );
-    } finally {
-      setLoading(false);
+      setError("Invalid email or password");
     }
   }
 
@@ -38,49 +29,18 @@ export function LoginPage() {
     <div style={{ maxWidth: 400, margin: "100px auto" }}>
       <h2>{mode === "login" ? "Login" : "Create account"}</h2>
 
-      <input
-        type="email"
-        placeholder="Email"
-        value={mail}
-        onChange={(e) => setMail(e.target.value)}
-        style={{ width: "100%", marginBottom: 8 }}
-      />
+      <input value={mail} onChange={e => setMail(e.target.value)} />
+      <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        style={{ width: "100%", marginBottom: 12 }}
-      />
-
-      <button onClick={handleSubmit} disabled={loading}>
-        {loading
-          ? "Please wait…"
-          : mode === "login"
-          ? "Login"
-          : "Create account"}
+      <button onClick={submit}>
+        {mode === "login" ? "Login" : "Create account"}
       </button>
 
-      {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
+      {error && <div style={{ color: "red" }}>{error}</div>}
 
-      <div style={{ marginTop: 16 }}>
-        {mode === "login" ? (
-          <span>
-            No account?{" "}
-            <button onClick={() => setMode("signup")}>
-              Create one
-            </button>
-          </span>
-        ) : (
-          <span>
-            Already have an account?{" "}
-            <button onClick={() => setMode("login")}>
-              Login
-            </button>
-          </span>
-        )}
-      </div>
+      <button onClick={() => setMode(mode === "login" ? "signup" : "login")}>
+        {mode === "login" ? "Create account" : "Already have an account?"}
+      </button>
     </div>
   );
 }

@@ -8,10 +8,8 @@ import { LoginPage } from "./pages/LoginPage";
 export default function App() {
   return (
     <Routes>
-      {/* Public route */}
       <Route path="/login" element={<LoginPage />} />
 
-      {/* Main app */}
       <Route
         path="/*"
         element={
