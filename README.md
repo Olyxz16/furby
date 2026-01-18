@@ -103,3 +103,6 @@ La structure du frontend, la navigation et les appels API ont néanmoins été m
 
 ### `planning.ts`
     Service dédié à la récupération du planning utilisateur.
+
+## Producted by
+SAZOS Cédric - LARONDE Mathis - TARZI Naïm
