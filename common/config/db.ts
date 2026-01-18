@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 const MIGRATE = process.env.MIGRATE;
-const MIGRATION_FILE = "./schema/schema.sql";
+const MIGRATION_FILE = "../common/schema/schema.sql";
 
 if(MIGRATE == "true") {
   (async () => {
