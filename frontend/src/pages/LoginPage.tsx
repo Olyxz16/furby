@@ -1,39 +1,86 @@
-// src/pages/LoginPage.tsx
+"use client";
+
 import React, { useState } from "react";
-import { apiFetch } from "../services/api";
+import { login, signin } from "../services/auth";
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [mail, setMail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  async function sendLink() {
+  async function handleSubmit() {
+    setLoading(true);
+    setError(null);
+
     try {
-      await apiFetch("/auth/magic-link", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-      setSent(true);
-    } catch (e: any) {
-      setError(e.message);
-    }
-  }
+      if (mode === "login") {
+        await login(mail, password);
+      } else {
+        await signin(mail, password);
+      }
 
-  if (sent) {
-    return <div>Check your email.</div>;
+      // backend sets session cookie → redirect
+      window.location.href = "/";
+    } catch {
+      setError(
+        mode === "login"
+          ? "Invalid email or password"
+          : "Unable to create account"
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div style={{ maxWidth: 400, margin: "100px auto" }}>
-      <h2>Login</h2>
+      <h2>{mode === "login" ? "Login" : "Create account"}</h2>
+
       <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="email"
+        type="email"
+        placeholder="Email"
+        value={mail}
+        onChange={(e) => setMail(e.target.value)}
         style={{ width: "100%", marginBottom: 8 }}
       />
-      <button onClick={sendLink}>Send magic link</button>
-      {error && <div style={{ color: "red" }}>{error}</div>}
+
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        style={{ width: "100%", marginBottom: 12 }}
+      />
+
+      <button onClick={handleSubmit} disabled={loading}>
+        {loading
+          ? "Please wait…"
+          : mode === "login"
+          ? "Login"
+          : "Create account"}
+      </button>
+
+      {error && <div style={{ color: "red", marginTop: 8 }}>{error}</div>}
+
+      <div style={{ marginTop: 16 }}>
+        {mode === "login" ? (
+          <span>
+            No account?{" "}
+            <button onClick={() => setMode("signup")}>
+              Create one
+            </button>
+          </span>
+        ) : (
+          <span>
+            Already have an account?{" "}
+            <button onClick={() => setMode("login")}>
+              Login
+            </button>
+          </span>
+        )}
+      </div>
     </div>
   );
 }

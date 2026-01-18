@@ -8,8 +8,15 @@ export function TopBarClient({ brand = "PROJET" }: Props) {
   return (
     <header className={styles.topbar}>
       <div className={styles.brand}>{brand}</div>
+
       <div className={styles.topbarRight}>
-        <div className={styles.badge}>Connexion</div>
+        <a
+          href="/login"
+          className={styles.badge}
+          style={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Connexion
+        </a>
       </div>
     </header>
   );

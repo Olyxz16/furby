@@ -41,31 +41,13 @@ export function PlanningPage({ studentId }: { studentId?: string } = {}) {
   const userMail = typeof window !== "undefined" ? localStorage.getItem("userMail") : null;
 
   return (
-    <Card
-      title="Planning"
-      right={<span style={{ fontSize: 12, opacity: 0.75 }}>{userMail ?? "Guest"}</span>}
-    >
-      <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14, flexWrap: "wrap" }}>
-        {loading && <span style={{ fontSize: 12, opacity: 0.7 }}>Loading…</span>}
-        {error && (
-          <div style={{ color: "#b32525", fontSize: 13 }}>
-            Failed to load agenda from API: {error}
-            <div style={{ marginTop: 8 }}>
-              <button
-                onClick={() => {
-                  setSlots(mockSlots);
-                  setError(null);
-                }}
-                style={{ padding: "6px 10px", fontSize: 13 }}
-              >
-                Use mock data
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+  <Card title="Planning">
+    {loading && <div>Loading…</div>}
+    {error && <div style={{ color: "red" }}>{error}</div>}
 
+    {!loading && !error && (
       <DataTable columns={columns} rows={slots} rowKey={(r) => r.id} />
-    </Card>
-  );
+    )}
+  </Card>
+);
 }
