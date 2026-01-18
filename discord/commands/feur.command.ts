@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
 import { MessageCommand } from "../types/index";
 export class GifCommand implements MessageCommand {
-  triggers = ["quoi ?"];
+  triggers = ["pourquoi","koi","quoi","pk"];
 
  
   private gifs: string[] = [
