@@ -1,5 +1,6 @@
-import { getAgendaFromId, getAgendaIdByUserId, setAgendaFromId } from "./agenda.repository";
-import { AgendaDto, AgendaTransformationError, fromAgendaDto, GetAgendaByUserDto, toAgendaDto, UpdateAgendaDto } from "./dto/agenda.dto";
+import { getAgendaFromId, getAgendaIdByUserId, setAgendaFromId, linkAgendaToUser as linkAgendaUser, listAgendas } from "./agenda.repository";
+import { AgendaDto, AgendaTransformationError, fromAgendaDto, GetAgendaByUserDto, LinkAgendaToUserDto, toAgendaDto, UpdateAgendaDto } from "./dto/agenda.dto";
+import { Agenda, AgendaIdentifier } from "./agenda.entity";
 
 
 export async function getAgendaFromUser(input: GetAgendaByUserDto): Promise<AgendaDto> {
@@ -17,4 +18,14 @@ export async function updateAgendaFromUser(input: UpdateAgendaDto): Promise<void
   }
   const agendaId = await getAgendaIdByUserId({userId: input.user.id});
   return setAgendaFromId(agendaId, agenda);
+}
+
+export async function linkAgendaToUser(input: LinkAgendaToUserDto): Promise<Agenda> {
+  const identifier = await linkAgendaUser(input);
+  const agenda = await getAgendaFromId(identifier.agenda_id);
+  return agenda;
+}
+
+export async function getAllAgendaIdentifiers(): Promise<AgendaIdentifier[]> {
+  return listAgendas();
 }

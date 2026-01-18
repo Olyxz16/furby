@@ -11,7 +11,7 @@ export async function createMagicLink(input: CreateMagicLinkDto): Promise<MagicL
     RETURNING id, user_id, link, created_at, expires_at;
   `;
 
-  const res = await db.query(query, [input.userId, input.link, expiresAt.toISOString()]);
+  const res = await db.query(query, [input.userId, input.link, expiresAt]);
   const row = res.rows[0];
 
   return {
@@ -35,6 +35,7 @@ export async function getMagicLinkByLink(input: GetMagicLinkByLinkDto): Promise<
   }
 
   const expiresAt = new Date(row.expires_at);
+  
   if (expiresAt < new Date()) {
     await deleteMagicLinkByLink(input);
     return undefined;
