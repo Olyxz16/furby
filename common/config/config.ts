@@ -36,7 +36,7 @@ if(!process.env.DB_PORT || process.env.DB_PORT == "") {
 
 
 export const config = {
-  PORT: process.env.PORT || 3000,
+  PORT: parseInt(process.env.PORT || "3000"),
   DISCORD_TOKEN: process.env.DISCORD_TOKEN!,
   DISCORD_APPLICATION_ID: process.env.DISCORD_APPLICATION_ID!,
   DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID!,

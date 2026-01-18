@@ -10,4 +10,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/agendas", checkAuthenticatedUser, agendaRouter);
+
+app.use("/auth/magic-link", checkAuthenticatedUser);
+app.use("/auth/logout", checkAuthenticatedUser);
 app.use("/auth", authRouter);

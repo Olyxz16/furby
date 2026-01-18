@@ -63,7 +63,7 @@ export async function Logout(input: LogoutDto): Promise<void> {
 }
 
 export async function CreateMagicLink(input: CreateMagicLinkDto): Promise<MagicLink> {
-  const link = crypto.randomUUID();
+  const link = input.link;
   const magicLink = await createMagicLink({userId: input.userId, link: link});
   return magicLink;
 }
