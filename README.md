@@ -1,13 +1,9 @@
 ### WEB PROJECT ###
 
-# Partie X :
-
-# Partie X : 
-
 ---------------------------------------------------------------------------------------------------
 
 
-# Partie X : Bot Discord
+# Partie 1 : Bot Discord
 
 Bot Discord développé en TypeScript, structuré de manière modulaire afin de séparer clairement
 la gestion du client Discord, des événements, des commandes et des tâches planifiées.
@@ -48,7 +44,7 @@ la gestion du client Discord, des événements, des commandes et des tâches pla
 ---------------------------------------------------------------------------------------------------
 
 
-# Partie X : Frontend
+# Partie 2 : Frontend
 
 L’implémentation complète de l’authentification et de certaines interactions frontend–backend n’a pas pu être finalisée.
 La structure du frontend, la navigation et les appels API ont néanmoins été mis en place afin de démontrer l’architecture prévue, mais puisque l'authetification ne marche pas le Frontend est inutilisable. 
