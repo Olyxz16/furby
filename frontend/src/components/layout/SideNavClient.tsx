@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import styles from "./layout.module.css";
 
 const items = [
-  { label: "Home", to: "/" },
+  { label: "Menu", to: "/" },
 ];
 
 export function SideNavClient() {

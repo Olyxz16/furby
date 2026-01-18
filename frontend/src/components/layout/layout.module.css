@@ -13,9 +13,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  color: #fff; /* white text */
-  background: linear-gradient(90deg, #0f2b2f 0%, #12373a 100%);
-  box-shadow: 0 6px 18px rgba(6, 22, 25, 0.12);
+  color: #fff;
+  background: linear-gradient(90deg, #0f2b2f 0%, #034950 100%);
+  box-shadow: 0 6px 18px rgb(22, 107, 122);
 }
 
 .brand {
@@ -80,10 +80,9 @@
   flex: 1;
   min-width: 0;
   padding: 28px;
-  background: #f4f6f7; /* light content background */
+  background: #f4f6f7;
 }
 
-/* responsive */
 @media (max-width: 768px) {
   .sidenav { width: 72px; padding: 12px; }
   .navItem { justify-content: center; font-weight: 600; }
