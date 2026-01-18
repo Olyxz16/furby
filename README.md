@@ -1,6 +1,7 @@
-# **Documentation Technique & Architecture \- Projet Furby**
+# **Documentation Technique & Architecture \- Projet AAW**
 
-**À l'attention de l'équipe pédagogique / correcteur**  
+Equipe : SAZOS Cédric - LARONDE Mathis - TARZI Naim
+
 Ce document a pour but de détailler les choix techniques, l'architecture du monorepo, la stratégie de déploiement (GitOps/K8s) et l'implémentation des fonctionnalités.
 
 ## **Architecture Globale : Le Monorepo**
@@ -8,17 +9,6 @@ Ce document a pour but de détailler les choix techniques, l'architecture du mon
 Le projet est architecturé sous forme de **Monorepo** géré par **NPM Workspaces**. Ce choix nous permet de partager du code, des types et de la logique métier entre les différents services (API et Bot Discord) sans duplication, tout en maintenant une séparation claire des responsabilités.
 
 ### **Structure des Workspaces**
-
-graph TD  
-    Root\[Monorepo Root\] \--\> Common\[📦 common (Shared Library)\]  
-    Root \--\> API\[🚀 api (Backend REST)\]  
-    Root \--\> Discord\[🤖 discord (Bot Service)\]  
-    Root \--\> Frontend\[💻 frontend (Next.js)\]  
-    Root \--\> Tests\[🧪 tests/integration\]  
-      
-    API \--\>|Import| Common  
-    Discord \--\>|Import| Common  
-    Frontend \--\>|HTTP Calls| API
 
 * **common/** : Le cœur du backend. Ce paquet contient :  
   * **Entities & DTOs** : Les définitions de types TypeScript partagées.  
@@ -49,7 +39,7 @@ graph TD
 
 ### **3\. Le Bot Discord (/discord)**
 
-* **Librairie** : Probablement discord.js.  
+* **Librairie** : discord.js  
 * **Features** :  
   * **Commandes Slash** : Architecture modulaire (command.registry.ts). Chaque commande (agenda, link, feur) est isolée.  
   * **Events** : Gestionnaire d'événements (interaction.event.ts, message.event.ts).  
