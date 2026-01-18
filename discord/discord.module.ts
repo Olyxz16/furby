@@ -1,5 +1,3 @@
-// Purpose: initialize Discord client and route events
-
 import { Client, GatewayIntentBits, Events, Collection, REST, Routes } from "discord.js";
 import { MessageEvent } from "./events/message.event";
 import { InteractionEvent } from "./events/interaction.event";
@@ -15,7 +13,6 @@ export async function startDiscord() {
         ],
     });
 
-    // Initialize commands collection
     client.commands = new Collection();
     const slashCommandsBody = [];
 

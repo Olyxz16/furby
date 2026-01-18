@@ -1,4 +1,3 @@
-// List of all the bot commands
 import { Command, MessageCommand, SlashCommand } from "../types/index";
 import { HelloCommand } from "./hello.command";
 import { GifCommand } from "./feur.command";

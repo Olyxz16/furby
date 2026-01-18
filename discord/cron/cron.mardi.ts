@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import { Client, TextChannel, ChannelType, PermissionsBitField } from "discord.js";
-let sentGuilds = new Set<string>();// to prevent multiple sent of the GIF
+let sentGuilds = new Set<string>();
 
 export function startMardiGIF(client: Client) {
 
@@ -9,16 +9,16 @@ export function startMardiGIF(client: Client) {
 
     client.guilds.cache.forEach(async (guild) =>
     {
-      if (sentGuilds.has(guild.id)) return; // line 3 to avoid multiple sent
+      if (sentGuilds.has(guild.id)) return;
 
       const channels = guild.channels.cache.filter(
-        (ch) => // Check if a text channel named general exist where Furbot can sent the gif
+        (ch) =>
           ch.type === ChannelType.GuildText &&
           ch.name.toLowerCase() === "general" &&
           ch.permissionsFor(client.user!)?.has(PermissionsBitField.Flags.SendMessages)
       ) as Map<string, TextChannel>;
 
-      if (channels.size === 0) return; // if no channel where found
+      if (channels.size === 0) return;
       
       channels.forEach(async (channel) =>
       {
@@ -40,7 +40,7 @@ export function startMardiGIF(client: Client) {
     });
   });
 
-  cron.schedule("0 9 * * 2", () => // reset to send the GIF the next tuesday
+  cron.schedule("0 9 * * 2", () =>
   {
     console.log("Reset for next Tuesday");
     sentGuilds = new Set();

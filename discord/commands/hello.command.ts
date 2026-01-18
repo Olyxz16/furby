@@ -1,8 +1,3 @@
-// Purpose: say hello on Discord
-
-// class with a run() function
-// run() -> hello.embed.ts.run(username)
-
 import { Message } from "discord.js";
 import { MessageCommand } from "../types/index";
 import { helloEmbed } from "../embeds/hello.embed";

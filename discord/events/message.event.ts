@@ -1,5 +1,3 @@
-// Purpose: react to Discord message events
-
 import { Message } from "discord.js";
 import { commands, isMessageCommand } from "../commands/command.registry";
 
